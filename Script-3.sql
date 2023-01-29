@@ -1,18 +1,18 @@
-drop table if exists course_schedule;
-drop table if exists time_type;
-drop table if exists course_enrollment;
-drop table if exists student;
-drop table if exists bike_range;
-drop table if exists range_type;
-drop table if exists problem;
-drop table if exists coach;
-drop table if exists person;
-drop table if exists course;
-drop table if exists course_type;
-drop table if exists classroom;
-drop table if exists bike;
-drop table if exists bike_type;
-drop table if exists agenda_type;
+-- drop table if exists course_schedule;
+-- drop table if exists time_type;
+-- drop table if exists course_enrollment;
+-- drop table if exists student;
+-- drop table if exists bike_range;
+-- drop table if exists range_type;
+-- drop table if exists problem;
+-- drop table if exists coach;
+-- drop table if exists person;
+-- drop table if exists course;
+-- drop table if exists course_type;
+-- drop table if exists classroom;
+-- drop table if exists bike;
+-- drop table if exists bike_type;
+-- drop table if exists agenda_type;
 
 
 create table if not exists agenda_type
