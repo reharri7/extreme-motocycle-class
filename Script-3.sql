@@ -177,7 +177,7 @@ create table if not exists course_schedule
 
 create table if not exists bike_assignment
 (
-    bike_assignment int not null primary key,
+    bike_assignment_id int not null primary key,
 	course_schedule_id	int	not null,
 	bike_id				int	not null,
 	constraint bike_course_schedule_id_fk
