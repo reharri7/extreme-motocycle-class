@@ -1,23 +1,25 @@
--- drop table if exists course_schedule;
--- drop table if exists time_type;
--- drop table if exists course_enrollment;
--- drop table if exists student;
--- drop table if exists bike_range;
--- drop table if exists range_type;
--- drop table if exists problem;
--- drop table if exists coach;
--- drop table if exists person;
--- drop table if exists course;
--- drop table if exists course_type;
--- drop table if exists classroom;
--- drop table if exists bike;
--- drop table if exists bike_type;
--- drop table if exists agenda_type;
-
-
 create database if not exists `extreme-motorcycle-class`;
 
 use `extreme-motorcycle-class`;
+drop table if exists coach_assignment;
+drop table if exists bike_assignment;
+drop table if exists course_schedule;
+drop table if exists time_type;
+drop table if exists course_enrollment;
+drop table if exists student;
+drop table if exists bike_range;
+drop table if exists range_type;
+drop table if exists problem;
+drop table if exists coach;
+drop table if exists person;
+drop table if exists course;
+drop table if exists course_type;
+drop table if exists classroom;
+drop table if exists bike;
+drop table if exists bike_type;
+drop table if exists agenda_type;
+
+
 
 
 create table if not exists agenda_type
@@ -88,9 +90,9 @@ create table if not exists person
 
 create table if not exists coach
 (
-    person_id            int        not null,
     coach_id             int        not null
         primary key,
+    person_id            int        not null,
     classroom_certified  tinyint null,
     dirtbike_certified   tinyint null,
     streetbike_certified tinyint null,
@@ -100,13 +102,13 @@ create table if not exists coach
 
 create table if not exists problem
 (
+    problem_id   int          not null
+        primary key,
     problem_date date         not null,
     bike_id      int          not null,
     repair_date  date         null,
     description  varchar(150) null,
     cost         int          null,
-    problem_id   int          not null
-        primary key,
     constraint problem_bike_bike_id_fk
         foreign key (bike_id) references bike (bike_id)
 );
@@ -130,9 +132,9 @@ create table if not exists bike_range
 
 create table if not exists student
 (
-    person_id  int not null,
     student_id int not null
         primary key,
+    person_id  int not null,
     constraint student_person_person_id_fk
         foreign key (person_id) references person (person_id)
 );
@@ -166,11 +168,11 @@ create table if not exists time_type
 
 create table if not exists course_schedule
 (
+    course_schedule_id int  not null
+        primary key,
     classroom_id       int  null,
     range_id           int  not null,
     course_date        date not null,
-    course_schedule_id int  not null
-        primary key,
     course_id          int  not null,
     time_type_id       int  not null,
     agenda_type_id        int  not null,
@@ -200,7 +202,7 @@ create table if not exists coach_assignment
 (
 	course_schedule_id	int	not null,
 	coach_id			int not null,
-	assinged_role		varchar(30) null,
+	assigned_role		varchar(30) null,
 	constraint coach_course_schedule_id_fk
 		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
 	constraint coach_id_fk
