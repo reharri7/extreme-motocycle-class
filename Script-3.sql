@@ -115,6 +115,7 @@ create table if not exists bike_range
     range_id   int not null
         primary key,
     range_type int not null,
+    capacity int not null,
     constraint bike_range_range_type_range_type_id_fk
         foreign key (range_type) references range_type (range_type_id)
 );
