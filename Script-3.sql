@@ -72,7 +72,6 @@ create table if not exists course
     capacity           int          null,
     course_description varchar(150) null,
     cost               int          null,
-    course_date        date         not null,
     constraint course_course_type_course_type_id_fk
         foreign key (course_type) references course_type (course_type_id)
 );
@@ -167,7 +166,6 @@ create table if not exists time_type
 
 create table if not exists course_schedule
 (
-    coach_id           int  not null,
     classroom_id       int  null,
     range_id           int  not null,
     course_date        date not null,
@@ -175,9 +173,9 @@ create table if not exists course_schedule
         primary key,
     course_id          int  not null,
     time_type_id       int  not null,
-    agenda_type        int  not null,
+    agenda_type_id        int  not null,
     constraint course_schedule_agenda_type_agenda_type_id_fk
-        foreign key (agenda_type) references agenda_type (agenda_type_id),
+        foreign key (agenda_type_id) references agenda_type (agenda_type_id),
     constraint course_schedule_bike_range_range_id_fk
         foreign key (range_id) references bike_range (range_id),
     constraint course_schedule_classroom_classroom_id_fk
@@ -208,3 +206,4 @@ create table if not exists coach_assignment
 	constraint coach_id_fk
 		foreign key (coach_id) references coach (coach_id)
 );
+
