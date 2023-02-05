@@ -15,6 +15,11 @@
 -- drop table if exists agenda_type;
 
 
+create database if not exists `extreme-motorcycle-class`;
+
+use `extreme-motorcycle-class`;
+
+
 create table if not exists agenda_type
 (
     agenda_type_id    int         not null
@@ -119,6 +124,7 @@ create table if not exists bike_range
     range_id   int not null
         primary key,
     range_type int not null,
+    available    tinyint null,
     constraint bike_range_range_type_range_type_id_fk
         foreign key (range_type) references range_type (range_type_id)
 );
@@ -176,11 +182,29 @@ create table if not exists course_schedule
         foreign key (range_id) references bike_range (range_id),
     constraint course_schedule_classroom_classroom_id_fk
         foreign key (classroom_id) references classroom (classroom_id),
-    constraint course_schedule_coach_coach_id_fk
-        foreign key (coach_id) references coach (coach_id),
     constraint course_schedule_course_course_id_fk
         foreign key (course_id) references course (course_id),
     constraint course_schedule_time_type_time_type_id_fk
         foreign key (time_type_id) references time_type (time_type_id)
 );
 
+create table if not exists bike_assignment
+(
+	course_schedule_id	int	not null,
+	bike_id				int	not null,
+	constraint bike_course_schedule_id_fk
+		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
+	constraint bike_id_fk
+		foreign key (bike_id) references bike (bike_id)
+);
+
+create table if not exists coach_assignment
+(
+	course_schedule_id	int	not null,
+	coach_id			int not null,
+	assinged_role		varchar(30) null,
+	constraint coach_course_schedule_id_fk
+		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
+	constraint coach_id_fk
+		foreign key (coach_id) references coach (coach_id)
+);
