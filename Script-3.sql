@@ -19,14 +19,6 @@ create database if not exists `extreme-motorcycle-class`;
 
 use `extreme-motorcycle-class`;
 
-
-create table if not exists agenda_type
-(
-    agenda_type_id    int         not null
-        primary key,
-    agenda_type_value varchar(35) null
-);
-
 create table if not exists bike_type
 (
     bike_type_id    int not null
@@ -171,7 +163,6 @@ create table if not exists course_schedule
         primary key,
     course_id          int  not null,
     time_type_id       int  not null,
-    agenda_type_id        int  not null,
     constraint course_schedule_agenda_type_agenda_type_id_fk
         foreign key (agenda_type_id) references agenda_type (agenda_type_id),
     constraint course_schedule_bike_range_range_id_fk
