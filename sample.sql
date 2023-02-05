@@ -12,6 +12,6 @@ insert into `bike_range` values (1, 2, 15), (2, 1, 15), (3, 1, 15), (4, 1, 15);
 insert into `student` values (1, 3), (2,4), (3,5);
 insert into `course_enrollment` values (1, 1, 100, 100, 100, 100, 100, 1, 100, 1, 1), (2, 2, 100, 100, 100, 100, 100, 21, 100, 1, 2), (3, 3, 100, 100, 100, 100, 100, 1, 100, 1, 3);
 insert into `time_type` values (1, 'AM range'), (2, 'PM range');
-insert into `course_schedule` values (1, null, 1, '2023-03-01', 1, 1), (1, null, 1, '2023-03-01', 1, 2) (2, 1, 1, '2023-03-02', 2, 1), (3, 2, 1, '2023-03-03', 3,2);
+insert into `course_schedule` values (1, 1, '2023-03-01', 1, 1), (1, 1, '2023-03-01', 1, 2) (2, 1, '2023-03-02', 2, 1), (3, 1, '2023-03-03', 3, 2);
 insert into `bike_assignment` values (1,1,2), (2,1,5), (3,2,1), (4,2,3), (5,2,4), (6,3,1), (7,3,3), (8,3,4);
 insert into `coach_assignment` values (1, 1, 2, "Range"), (2, 2, 1, "Classroom"), (3, 2, 1, "Range"), (4, 3, 1, "Classroom"), (5, 3, 1, "Range");
