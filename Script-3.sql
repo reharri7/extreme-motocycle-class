@@ -24,7 +24,7 @@ create table if not exists bike_type
 (
     bike_type_id    int not null
         primary key,
-    bike_type_value int null
+    bike_type_value varchar(10) null
 );
 
 create table if not exists bike
