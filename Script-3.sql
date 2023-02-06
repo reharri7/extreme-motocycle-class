@@ -1,6 +1,7 @@
 create database if not exists `extreme-motorcycle-class`;
 
 use `extreme-motorcycle-class`;
+drop table if exists range_assignment;
 drop table if exists coach_assignment;
 drop table if exists bike_assignment;
 drop table if exists course_schedule;
