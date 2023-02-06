@@ -164,8 +164,6 @@ create table if not exists course_schedule
     course_date        date not null,
     course_id          int  not null,
     time_type_id       int  not null,
-    constraint course_schedule_bike_range_range_id_fk
-        foreign key (range_id) references bike_range (range_id),
     constraint course_schedule_classroom_classroom_id_fk
         foreign key (classroom_id) references classroom (classroom_id),
     constraint course_schedule_course_course_id_fk
@@ -199,11 +197,11 @@ create table if not exists coach_assignment
 
 create table if not exists range_assignment
 (
-    range_assingment_id int not null primary key,
+    range_assignment_id int not null primary key,
 	range_id	int	not null,
 	course_schedule_id	int	not null,
 	constraint range_course_schedule_id_fk
 		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
-	constriant range_id_fk
+	constraint range_id_fk
 		foreign key (range_id) references bike_range (range_id)
 );
