@@ -1,3 +1,4 @@
+drop database if exists `extreme-motorcycle-class`;
 create database if not exists `extreme-motorcycle-class`;
 use `extreme-motorcycle-class`;
 
@@ -38,6 +39,7 @@ create table if not exists bike
     cc            int         null,
     constraint bike_bike_type_bike_type_id_fk
         foreign key (type) references bike_type (bike_type_id)
+        on delete cascade
 );
 
 create table if not exists classroom
@@ -65,6 +67,7 @@ create table if not exists course
     cost               int          null,
     constraint course_course_type_course_type_id_fk
         foreign key (course_type) references course_type (course_type_id)
+        on delete cascade
 );
 
 create table if not exists person
@@ -86,7 +89,7 @@ create table if not exists coach
     dirtbike_certified   tinyint null,
     streetbike_certified tinyint null,
     constraint coach_person_person_id_fk
-        foreign key (person_id) references person (person_id)
+        foreign key (person_id) references person (person_id) on delete cascade
 );
 
 create table if not exists problem
@@ -99,7 +102,7 @@ create table if not exists problem
     description  varchar(150) null,
     cost         int          null,
     constraint problem_bike_bike_id_fk
-        foreign key (bike_id) references bike (bike_id)
+        foreign key (bike_id) references bike (bike_id) on delete cascade
 );
 
 create table if not exists range_type
@@ -116,7 +119,7 @@ create table if not exists bike_range
     range_type int not null,
     capacity int not null,
     constraint bike_range_range_type_range_type_id_fk
-        foreign key (range_type) references range_type (range_type_id)
+        foreign key (range_type) references range_type (range_type_id) on delete cascade
 );
 
 create table if not exists student
@@ -125,7 +128,7 @@ create table if not exists student
         primary key,
     person_id  int not null,
     constraint student_person_person_id_fk
-        foreign key (person_id) references person (person_id)
+        foreign key (person_id) references person (person_id) on delete cascade
 );
 
 create table if not exists course_enrollment
@@ -164,11 +167,11 @@ create table if not exists course_schedule
     course_id          int  not null,
     time_type_id       int  not null,
     constraint course_schedule_classroom_classroom_id_fk
-        foreign key (classroom_id) references classroom (classroom_id),
+        foreign key (classroom_id) references classroom (classroom_id) on delete cascade,
     constraint course_schedule_course_course_id_fk
-        foreign key (course_id) references course (course_id),
+        foreign key (course_id) references course (course_id) on delete cascade,
     constraint course_schedule_time_type_time_type_id_fk
-        foreign key (time_type_id) references time_type (time_type_id)
+        foreign key (time_type_id) references time_type (time_type_id) on delete cascade
 );
 
 create table if not exists bike_assignment
@@ -177,9 +180,9 @@ create table if not exists bike_assignment
 	course_schedule_id	int	not null,
 	bike_id				int	not null,
 	constraint bike_course_schedule_id_fk
-		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
+		foreign key (course_schedule_id) references course_schedule (course_schedule_id) on delete cascade,
 	constraint bike_id_fk
-		foreign key (bike_id) references bike (bike_id)
+		foreign key (bike_id) references bike (bike_id) on delete cascade
 );
 
 create table if not exists coach_assignment
@@ -189,9 +192,9 @@ create table if not exists coach_assignment
 	coach_id			int not null,
 	assigned_role		varchar(30) null,
 	constraint coach_course_schedule_id_fk
-		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
+		foreign key (course_schedule_id) references course_schedule (course_schedule_id) on delete cascade,
 	constraint coach_id_fk
-		foreign key (coach_id) references coach (coach_id)
+		foreign key (coach_id) references coach (coach_id) on delete cascade
 );
 
 create table if not exists range_assignment
@@ -200,7 +203,7 @@ create table if not exists range_assignment
 	range_id	int	not null,
 	course_schedule_id	int	not null,
 	constraint range_course_schedule_id_fk
-		foreign key (course_schedule_id) references course_schedule (course_schedule_id),
+		foreign key (course_schedule_id) references course_schedule (course_schedule_id) on delete cascade,
 	constraint range_id_fk
-		foreign key (range_id) references bike_range (range_id)
+		foreign key (range_id) references bike_range (range_id) on delete cascade
 );
