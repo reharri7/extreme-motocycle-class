@@ -1,6 +1,6 @@
 create database if not exists `extreme-motorcycle-class`;
-
 use `extreme-motorcycle-class`;
+
 drop table if exists range_assignment;
 drop table if exists coach_assignment;
 drop table if exists bike_assignment;
@@ -19,18 +19,16 @@ drop table if exists classroom;
 drop table if exists bike;
 drop table if exists bike_type;
 
-
-
 create table if not exists bike_type
 (
-    bike_type_id    int not null
+    bike_type_id    int AUTO_INCREMENT not null
         primary key,
     bike_type_value varchar(10) null
 );
 
 create table if not exists bike
 (
-    bike_id       int         not null
+    bike_id       int	AUTO_INCREMENT not null
         primary key,
     brand         varchar(30) null,
     type          int         not null,
@@ -44,21 +42,21 @@ create table if not exists bike
 
 create table if not exists classroom
 (
-    classroom_id int        not null
+    classroom_id int	AUTO_INCREMENT not null
         primary key,
     capacity     int        not null
 );
 
 create table if not exists course_type
 (
-    course_type_id    int         not null
+    course_type_id    int	AUTO_INCREMENT not null
         primary key,
     course_type_value varchar(30) not null
 );
 
 create table if not exists course
 (
-    course_id          int          not null
+    course_id          int	AUTO_INCREMENT not null
         primary key,
     course_name        varchar(30)  null,
     course_type        int          not null,
@@ -71,7 +69,7 @@ create table if not exists course
 
 create table if not exists person
 (
-    person_id  int          not null
+    person_id  int	AUTO_INCREMENT not null
         primary key,
     full_name  varchar(30)  null,
     address    varchar(150) null,
@@ -81,7 +79,7 @@ create table if not exists person
 
 create table if not exists coach
 (
-    coach_id             int        not null
+    coach_id             int	AUTO_INCREMENT not null
         primary key,
     person_id            int        not null,
     classroom_certified  tinyint null,
@@ -93,7 +91,7 @@ create table if not exists coach
 
 create table if not exists problem
 (
-    problem_id   int          not null
+    problem_id   int	AUTO_INCREMENT not null
         primary key,
     problem_date date         not null,
     bike_id      int          not null,
@@ -106,14 +104,14 @@ create table if not exists problem
 
 create table if not exists range_type
 (
-    range_type_id    int         not null
+    range_type_id    int	AUTO_INCREMENT not null
         primary key,
     range_type_value varchar(30) not null
 );
 
 create table if not exists bike_range
 (
-    range_id   int not null
+    range_id   int	AUTO_INCREMENT not null
         primary key,
     range_type int not null,
     capacity int not null,
@@ -123,7 +121,7 @@ create table if not exists bike_range
 
 create table if not exists student
 (
-    student_id int not null
+    student_id int	AUTO_INCREMENT not null
         primary key,
     person_id  int not null,
     constraint student_person_person_id_fk
@@ -132,7 +130,7 @@ create table if not exists student
 
 create table if not exists course_enrollment
 (
-    course_enrollment_id int        not null
+    course_enrollment_id int	AUTO_INCREMENT not null
         primary key,
     course_id            int        not null,
     exercise_1_score     int        null,
@@ -152,14 +150,14 @@ create table if not exists course_enrollment
 
 create table if not exists time_type
 (
-    time_type_id    int         not null
+    time_type_id    int	AUTO_INCREMENT not null
         primary key,
     time_type_value varchar(30) not null
 );
 
 create table if not exists course_schedule
 (
-    course_schedule_id int  not null
+    course_schedule_id int	AUTO_INCREMENT not null
         primary key,
     classroom_id       int  null,
     course_date        date not null,
@@ -175,7 +173,7 @@ create table if not exists course_schedule
 
 create table if not exists bike_assignment
 (
-    bike_assignment_id int not null primary key,
+    bike_assignment_id int	AUTO_INCREMENT not null primary key,
 	course_schedule_id	int	not null,
 	bike_id				int	not null,
 	constraint bike_course_schedule_id_fk
@@ -186,7 +184,7 @@ create table if not exists bike_assignment
 
 create table if not exists coach_assignment
 (
-    coach_assignment_id int not null primary key,
+    coach_assignment_id int	AUTO_INCREMENT not null primary key,
 	course_schedule_id	int	not null,
 	coach_id			int not null,
 	assigned_role		varchar(30) null,
@@ -198,7 +196,7 @@ create table if not exists coach_assignment
 
 create table if not exists range_assignment
 (
-    range_assignment_id int not null primary key,
+    range_assignment_id int	AUTO_INCREMENT not null primary key,
 	range_id	int	not null,
 	course_schedule_id	int	not null,
 	constraint range_course_schedule_id_fk
