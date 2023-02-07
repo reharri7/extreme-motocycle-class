@@ -143,7 +143,7 @@ create table if not exists course_enrollment
     exercise_5_score     int        null,
     passed               tinyint null,
     written_score        int        null,
-    paid                 tinyint not null,
+    paid                 tinyint not null default false,
     student_id           int        null,
     constraint course_enrollment_course_course_id_fk
         foreign key (course_id) references course (course_id) on delete set null,
