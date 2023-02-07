@@ -146,9 +146,9 @@ create table if not exists course_enrollment
     paid                 tinyint not null,
     student_id           int        not null,
     constraint course_enrollment_course_course_id_fk
-        foreign key (course_id) references course (course_id),
+        foreign key (course_id) references course (course_id) on delete set null,
     constraint course_enrollment_student_student_id_fk
-        foreign key (student_id) references student (student_id)
+        foreign key (student_id) references student (student_id) on delete set null
 );
 
 create table if not exists time_type
