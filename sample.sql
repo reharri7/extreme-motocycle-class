@@ -12,9 +12,10 @@ insert into `bike_range` (range_type, capacity) values (2, 15), (1, 15), (1, 15)
 insert into `student` (person_id) values (3), (4), (5);
 insert into `course_enrollment` (course_id, exercise_1_score, exercise_2_score, exercise_3_score, exercise_4_score, exercise_5_score, passed, written_score, paid, student_id) values (1, 100, 100, 100, 100, 100, 1, 100, 1, 1), (2, 100, 100, 100, 100, 100, 21, 100, 1, 2), (3, 100, 100, 100, 100, 100, 1, 100, 1, 3);
 insert into `time_type` (time_type_value) values ('AM range'), ('PM range');
-insert into `course_schedule` (classroom_id, course_date, course_id, time_type_id) values (1, '2023-03-01', 1, 1), (1, '2023-03-01', 1, 2), (1, '2023-03-02', 2, 1), (1, '2023-03-03', 3, 2);
+insert into `course_schedule` (classroom_id, course_date, course_id, time_type_id) values (null, '2023-03-01', 1, 1), (null, '2023-03-01', 1, 2), (1, '2023-03-02', 2, 1), (1, '2023-03-03', 3, 2);
 insert into `bike_assignment` (course_schedule_id, bike_id) values (1,2), (1,5), (2,1), (2,3), (2,4), (3,1), (3,3), (3,4);
 insert into `coach_assignment` (course_schedule_id, coach_id, assigned_role) values (1, 2, 'Range'), (2, 1, 'Classroom'), (2, 1, 'Range'), (3, 1, 'Classroom'), (3, 1, 'Range');
 insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (1, 1, 1);
 insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (2, 2, 2);
 insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (3, 3, 3);
+
