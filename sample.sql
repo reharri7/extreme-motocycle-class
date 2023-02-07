@@ -16,6 +16,7 @@ insert into `course_schedule` (classroom_id, course_date, course_id, time_type_i
 insert into `bike_assignment` (course_schedule_id, bike_id) values (1,2), (1,5), (2,1), (2,3), (2,4), (3,1), (3,3), (3,4);
 insert into `coach_assignment` (course_schedule_id, coach_id, assigned_role) values (1, 2, 'Range'), (2, 1, 'Classroom'), (2, 1, 'Range'), (3, 1, 'Classroom'), (3, 1, 'Range');
 insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (1, 1, 1);
-insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (2, 2, 2);
+insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (2, 1, 2);
 insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (3, 3, 3);
+insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (4, 2, 4);
 
