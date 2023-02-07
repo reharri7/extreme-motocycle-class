@@ -135,7 +135,7 @@ create table if not exists course_enrollment
 (
     course_enrollment_id int	AUTO_INCREMENT not null
         primary key,
-    course_id            int        not null,
+    course_id            int        null,
     exercise_1_score     int        null,
     exercise_2_score     int        null,
     exercise_3_score     int        null,
@@ -144,7 +144,7 @@ create table if not exists course_enrollment
     passed               tinyint null,
     written_score        int        null,
     paid                 tinyint not null,
-    student_id           int        not null,
+    student_id           int        null,
     constraint course_enrollment_course_course_id_fk
         foreign key (course_id) references course (course_id) on delete set null,
     constraint course_enrollment_student_student_id_fk
