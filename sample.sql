@@ -1,0 +1,22 @@
+use `extreme-motorcycle-class`;
+insert into `bike_type` (bike_type_value) values ('Street'), ('Dirt');
+insert into `bike` (brand, `type`, license_plate, vin, broken, cc) values ('Toyota', 1, '555ABC', '1111abcd1111abcd1', false, 250), ('Ford', 2, '555ABD', '1111abcd1111abcd2', false, 250), ('Toyota', 1, '555ABE', '1111abcd1111abcd3', false, 250), ('Toyota', 1, '555ABF', '1111abcd1111abcd4', true, 250), ('Ford', 2, '555ABG', '1111abcd1111abcd5', false, 250);
+insert into `classroom` (capacity) values (15), (30);
+insert into `course_type` (course_type_value) values ('Street'), ('Dirt');
+insert into `course` (course_name, course_type, capacity, course_description, cost) values ('Dirt Bike Basics', 2, 15, 'Basic dirt bike skills', 200), ('Basic Motorcycle Skills', 1, 30, 'Basic street bike skills', 200), ('Advanced Motorcycle Skills', 1, 30, 'Advanced street bike skills', 400);
+insert into `person` (full_name, address, date_birth, phone) values ('Maura Peterson', '111 1st street', '1995-01-01', '5555555555'), ('Josh McManus', '222 2nd street', '1996-01-01', '5555555556'), ('Rhett Harrison', '333 3rd street', '1997-01-01', '5555555557'), ('Addison Corey', '444 4th street', '1998-01-01', '5555555558'), ('Muhammad Fateen', '555 5th street', '1999-01-01', '5555555559');
+insert into `coach` (person_id, classroom_certified, dirtbike_certified, streetbike_certified) values (1, 1, 0, 1), (2, 0, 1, 0);
+insert into `problem` (problem_date, bike_id, repair_date, description, cost) values ('2023-01-01', 1, '2023-01-02', 'wheel fell off', 100), ('2023-01-03', 1, '2023-01-04', 'wheel fell off', 100), ('2023-01-01', 2, '2023-01-02', ' both wheels fell off', 200);
+insert into `range_type` (range_type_value) values ('Street'), ('Dirt');
+insert into `bike_range` (range_type, capacity) values (2, 15), (1, 15), (1, 15), (1, 15);
+insert into `student` (person_id) values (3), (4), (5);
+insert into `course_enrollment` (course_id, exercise_1_score, exercise_2_score, exercise_3_score, exercise_4_score, exercise_5_score, passed, written_score, paid, student_id) values (1, 100, 100, 100, 100, 100, 1, 100, 1, 1), (2, 100, 100, 100, 100, 100, 21, 100, 1, 2), (3, 100, 100, 100, 100, 100, 1, 100, 1, 3);
+insert into `time_type` (time_type_value) values ('AM range'), ('PM range');
+insert into `course_schedule` (classroom_id, course_date, course_id, time_type_id) values (null, '2023-03-01', 1, 1), (null, '2023-03-01', 1, 2), (1, '2023-03-02', 2, 1), (1, '2023-03-03', 3, 2);
+insert into `bike_assignment` (course_schedule_id, bike_id) values (1,2), (1,5), (2,1), (2,3), (2,4), (3,1), (3,3), (3,4);
+insert into `coach_assignment` (course_schedule_id, coach_id, assigned_role) values (1, 2, 'Range'), (2, 1, 'Classroom'), (2, 1, 'Range'), (3, 1, 'Classroom'), (3, 1, 'Range');
+insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (1, 1, 1);
+insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (2, 1, 2);
+insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (3, 3, 3);
+insert into `range_assignment` (range_assignment_id, range_id, course_schedule_id) VALUES (4, 2, 4);
+
