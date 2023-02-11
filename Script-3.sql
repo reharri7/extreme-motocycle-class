@@ -63,7 +63,7 @@ create table if not exists course
     course_name        varchar(30)  null,
     course_type        int          not null,
     capacity           int          null,
-    course_description varchar(150) null,
+    course_description varchar(100) null,
     cost               int          null,
     constraint course_course_type_course_type_id_fk
         foreign key (course_type) references course_type (course_type_id)
