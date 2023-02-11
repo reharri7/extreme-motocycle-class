@@ -69,12 +69,6 @@ public class CourseMenu {
     }
     
 
-
-    private void editCourse(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        // TODO Auto-generated method stub
-        
-    }
-    
     private void checkCourse(ResultSet rs, Statement stmt, Connection conn,  String course_name, 
             int course_type, int capacity, String description, int cost) throws SQLException {
         String select = "SELECT * FROM course WHERE "
@@ -106,12 +100,94 @@ public class CourseMenu {
         }
     }
     
-    private void deleteCourse(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        // TODO Auto-generated method stub
+    private void editCourse(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) 
+            throws SQLException {
+        System.out.println("Please enter a number for the course id");
+        int course_id = scanner.nextInt();
         
+        System.out.println("Please enter the attribute to change");
+        String attribute_name = scanner.next();
+        
+        System.out.println("Please enter the new value");
+        String new_value = scanner.next();
+        
+        String update = "UPDATE course "
+                + "SET "
+                + attribute_name + " = "
+                + new_value
+                + " WHERE course_id = "
+                + course_id;
+        
+        stmt = conn.createStatement();
+        stmt.executeUpdate(update);
+        
+        checkCourseAttribute(rs, stmt, conn, course_id, attribute_name, new_value);
+    }
+    
+    private void checkCourseAttribute(ResultSet rs, Statement stmt, Connection conn, int course_id,
+            String attribute_name, String new_value ) throws SQLException {
+        String select = "SELECT " + attribute_name
+                + " FROM course"
+                + " WHERE course_id = " + course_id;
+        
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(select);
+        
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        int numColumns = metaData.getColumnCount();
+        
+        Object obj = null;
+        while (rs.next()) {
+            if (rs.getObject(1).toString().matches(new_value)) {
+                System.out.println("Success");
+            } else {
+                System.out.print("Unable to complete request, please try again");
+            }
+            System.out.println("");
+        }
+    }
+    
+    private void deleteCourse(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) 
+            throws SQLException {
+        System.out.println("Please enter a number for the course id");
+        int course_id = scanner.nextInt();
+        
+        String update = "DELETE"
+                + " FROM course"
+                + " WHERE course_id = "
+                + course_id;
+        
+        stmt = conn.createStatement();
+        stmt.executeUpdate(update);
+        
+        checkCourseDelete(rs, stmt, conn, course_id);
     }
     
         
+    private void checkCourseDelete(ResultSet rs, Statement stmt, Connection conn, int course_id) 
+            throws SQLException {
+        String select = "SELECT *"
+                + " FROM course"
+                + " WHERE course_id = " + course_id;
+        
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(select);
+        
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        int numColumns = metaData.getColumnCount();
+        
+        Object obj = null;
+        if (!rs.next()) {
+            System.out.println("Success");
+        } else {
+            System.out.print("Unable to complete request, please try again");
+        }
+        System.out.println("");
+        
+    }
+
     private void courseReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         // TODO Auto-generated method stub
         
