@@ -1,5 +1,13 @@
 package emc;
 
+/**
+ * CourseMenu.java
+ *
+ * Prints and handles Course sub menu.
+ *
+ * Group 4
+ */
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

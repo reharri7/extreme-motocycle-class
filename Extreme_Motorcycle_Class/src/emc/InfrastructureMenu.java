@@ -1,5 +1,13 @@
 package emc;
 
+/**
+ * InfrastructureMenu.java
+ *
+ * Prints and handles Infrastructure sub menu.
+ *
+ * Group 4
+ */
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;

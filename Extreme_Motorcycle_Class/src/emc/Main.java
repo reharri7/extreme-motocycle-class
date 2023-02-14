@@ -1,5 +1,13 @@
 package emc;
 
+/**
+ * Main.java
+ *
+ * Prints and handles main menu.
+ *
+ * Group 4
+ */
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
