@@ -174,8 +174,9 @@ public class GarageMenu {
 
         System.out.println("Please enter the new value for the attribute: ");
         String newValue = scanner.next();
-
-        /* Make a switch case to determine whether to cast the input to another type */
+        
+        /* TODO: Check to ensure valid column */
+        /* TODO: Make a switch case to determine whether to cast the input to another type */
 
     }
 
