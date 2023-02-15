@@ -101,7 +101,7 @@ public class StudentMenu {
     public void createStudent(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         conn.setAutoCommit(false); // do not autocommit
 
-        System.out.println("Please enter a student name between 1-30 characters: ");
+        System.out.println("Please enter a Student name between 1-30 characters: ");
         String student_name = scanner.next();
 
         System.out.println("Please enter an address between 1-50 characters: ");
@@ -121,7 +121,13 @@ public class StudentMenu {
             return;
         }
 
-        Date date_birth = new Date(birth_year, birth_month, birth_day);
+        if (birth_month > 0 && birth_month < 13 && birth_day > 0 && birth_day < 32) {
+            Date date_birth = new Date(birth_year, birth_month, birth_day);
+        } else {
+            System.out.println("Birthday values out of range");
+            return;
+        }
+
 
         System.out.println("Please enter phone number (5555551234): ");
         String phone = scanner.next();
@@ -160,18 +166,18 @@ public class StudentMenu {
                     int result = stmt.executeUpdate();
 
                     if (result > 0) { //success
-                        System.out.println("Successfully added student!");
+                        System.out.println("Successfully added Student!");
                         conn.commit();
                     } else {
-                        System.out.println("Unable to add student");
+                        System.out.println("Unable to add Student");
                         conn.rollback();
                     }
                 } else {
                     // no person_id
-                    System.out.println("Unable to find person");
+                    System.out.println("Unable to find Person");
                 }
             } else {
-                System.out.println("Unable to create person");
+                System.out.println("Unable to create Person");
                 conn.rollback();
             }
         } catch (SQLException sqlx) {
@@ -256,85 +262,127 @@ public class StudentMenu {
         conn.setAutoCommit(false); // do not autocommit
 
         try {
-            System.out.println("Please enter student ID: ");
+            System.out.println("Please enter Student ID: ");
             int student_id = scanner.nextInt();
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
 
-        //YOU'RE RIGHT HERE!
-        System.out.println("What would you like to ");
+        System.out.println("Please enter values to change or leave blank to skip.");
+        System.out.println("Enter a Student name between 1-30 characters: ");
+        String student_name = scanner.next();
 
-        Date date_birth = new Date(birth_year, birth_month, birth_day);
+        System.out.println("Enter an address between 1-50 characters: ");
+        String address = scanner.next();
+
+        try {
+            System.out.println("Month, day, and year must be entered to change birthday.");
+            System.out.println("Enter a numeric birth month value: ");
+            int birth_month = scanner.nextInt();
+
+            System.out.println("Enter birth day: ");
+            int birth_day = scanner.nextInt();
+
+            System.out.println("Enter birth year: ");
+            int birth_year = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            System.out.println("Number must be an integer");
+            return;
+        }
+
+        if (birth_month > 0 && birth_month < 13 && birth_day > 0 and birth_day < 32) {
+            Date date_birth = new Date(birth_year, birth_month, birth_day);
+        } else {
+            System.out.println("Birthday values out of range");
+            date=birth_day = null;
+        }
 
         System.out.println("Please enter phone number (5555551234): ");
         String phone = scanner.next();
 
-        try {
-            stmt = conn.prepareStatement(
-                    "INSERT INTO person (full_name, address, date_birth, phone) " +
-                            "VALUES (?, ?, ?, ?)");
-            stmt.setString(1, student_name);
-            stmt.setString(2, address);
-            stmt.setDate(3, date_birth);
-            stmt.setString(4, phone);
+        String statement = "UPDATE person SET ";
+        
+        boolean name = false;
+        boolean addy = false;
+        boolean bday = false;
+        boolean tele = false;
 
-            int result = stmt.executeUpdate();
+        if (student_name != null && !student_name.equals("")) {
+            statement += "full_name=?,";
+            name = true;
+        }
+        if (address != null ** !address.equals("")) {
+            statement += "address=?,";
+            addy = true;
+        }
+        if (date_birth != null) {
+            statement += "date_birth=?";
+            bday = true;
+        }
+        if (phone != null && !phone.equals("")) {
+            statement += "phone=?";
+            tele = true;
+        }
 
-            if (result > 0) { //success
-                stmt = conn.prepareStatement(
-                        "SELECT person_id FROM person " +
-                                "WHERE full_name=? AND address=? " +
-                                "AND date_birth=? AND phone=?");
-                stmt.setString(1, student_name);
-                stmt.setString(2, address);
-                stmt.setDate(3, date_birth);
-                stmt.setString(4, phone);
+        if (statement.endsWith(",")) {
+            statement = statement.substring(0, statement.length()-1);
+        }
 
-                rs = stmt.executeQuery();
-                int person_id;
+        statement += " FROM person,student WHERE person.person_id=student.person_id AND student.student_id=?";
 
-                while (rs.next()) {
-                    person_id = rs.getInt(1);
-                }
-
-                if (person_id != null) { //success
-                    stmt = conn.prepareStatement("INSERT INTO student (person_id) VALUES (?)");
-                    stmt.setString(1, person_id);
-                    int result = stmt.executeUpdate();
-
-                    if (result > 0) { //success
-                        System.out.println("Successfully added student!");
-                        conn.commit();
-                    } else {
-                        System.out.println("Unable to add student");
-                        conn.rollback();
-                    }
-                } else {
-                    // no person_id
-                    System.out.println("Unable to find person");
-                }
-            } else {
-                System.out.println("Unable to create person");
-                conn.rollback();
-            }
-        } catch (SQLException sqlx) {
-            System.out.println("SQL Exception");
-        } finally {
+        if (name || addy || bday || tele) {
             try {
-                if (conn != null) {
-                    conn.close();
+                stmt = conn.prepareStatement(statement);
+                int i = 1;
+
+                if (name) {
+                    stmt.setString(i, student_name);
+                    i++;
                 }
-                if (stmt != null) {
-                    stmt.close();
+                if (addy) {
+                    stmt.setString(i, address);
+                    i++;
                 }
-                if (rs != null) {
-                    rs.close();
+                if (bday) {
+                    stmt.setString(i, date_birth);
+                    i++;
+                }
+                if (tele) {
+                    stmt.setString(i, phone);
+                    i++;
+                }
+                stmt.setString(i, student_id);
+
+                int result = stmt.executeUpdate();
+
+                if (result > 0) { //success
+                    System.out.println("Updated Student!");
+                    conn.commit();
+                } else {
+                    System.out.println("Unable to create Person");
+                    conn.rollback();
                 }
             } catch (SQLException sqlx) {
-                System.out.println("SQL Exception when closing resources");
+                System.out.println("SQL Exception");
+            } finally {
+                try {
+                    if (conn != null) {
+                        conn.close();
+                    }
+                    if (stmt != null) {
+                        stmt.close();
+                    }
+                    if (rs != null) {
+                        rs.close();
+                    }
+                } catch (SQLException sqlx) {
+                    System.out.println("SQL Exception when closing resources");
+                }
             }
+        } else {
+            System.out.println("No values to change");
+            return;
         }
     }
 
