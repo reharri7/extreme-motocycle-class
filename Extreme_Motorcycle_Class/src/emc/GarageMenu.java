@@ -1,6 +1,7 @@
 package emc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,8 +43,6 @@ public class GarageMenu {
             }
         }
     }
-
-    
 
     private void printMenu() {
         System.out.println("Garage Menu");
@@ -199,6 +198,23 @@ public class GarageMenu {
 
     private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bikes registered: ");
+        String query = "SELECT * FROM bike";
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Print the resultset
+        try {
+            while (rs.next()){
+                
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
 
     }
     private void createBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -220,7 +236,22 @@ public class GarageMenu {
         System.out.println("Please enter a number to specify the bike's CCs: ");
         int cc = scanner.nextInt();
 
+        // Build the query and use PreparedStatements to insert the data
+        String query = "INSERT INTO bike (brand, bike_type, license_plate, vin, broken, cc) VALUES (?, ?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setString(1, brand);
+            ps.setInt(2, bikeType);
+            ps.setString(3, licensePlate);
+            ps.setString(4, vin);
+            ps.setInt(5, broken);
+            ps.setInt(6, cc);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        System.out.println("Bike created successfully!");
     }
 
 }
