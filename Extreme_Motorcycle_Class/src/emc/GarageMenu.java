@@ -1,5 +1,13 @@
 package emc;
 
+/**
+ * GarageMenu.java
+ *
+ * Prints and handles Garage sub menu.
+ *
+ * Group 4
+ */
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
