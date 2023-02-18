@@ -2,8 +2,8 @@ package emc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -18,6 +18,7 @@ public class Main {
 
         ResultSet rs = null;
         Statement stmt = null;
+        PreparedStatement pStmt = null;
         Connection conn = null;
         
         CourseMenu courseMenu = new CourseMenu();
@@ -41,7 +42,7 @@ public class Main {
                     try {
                         selection = scanner.nextInt();
                         switch (selection){
-                        case 1: courseMenu.menu(rs, stmt, conn, scanner); break;
+                        case 1: courseMenu.menu(rs, pStmt, conn, scanner); break;
                         case 2: studentMenu.menu(rs, stmt, conn, scanner); break;
                         case 3: garageMenu.menu(rs, stmt, conn, scanner); break;
                         case 4: staffMenu.menu(rs, stmt, conn, scanner); break;
