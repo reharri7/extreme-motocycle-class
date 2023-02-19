@@ -10,7 +10,8 @@ import java.util.Scanner;
 
 public class CourseMenu {
 
-    public void menu(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void menu(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
+            throws SQLException {
         int selection;
         
         while(true) {
@@ -40,8 +41,8 @@ public class CourseMenu {
     
 
 
-    private void createCourse(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void createCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) throws SQLException {
         
             System.out.println("Please enter a course name between 1-30 characters");
             String course_name = scanner.next();
@@ -72,23 +73,24 @@ public class CourseMenu {
     }
     
 
-    private void checkCourse(ResultSet rs, PreparedStatement stmt, Connection conn,  String course_name, 
-            int course_type, int capacity, String description, int cost) throws SQLException {
-        String select = "SELECT * FROM course WHERE "
-                + "course_name = '" + course_name
-                + "' AND course_type = " + course_type
-                + " AND capacity = " + capacity
-                + " AND course_description = '" + description
-                + "' AND cost = " + cost;
+    private void checkCourse(ResultSet rs, PreparedStatement stmt, Connection conn,  
+            String course_name, int course_type, int capacity, String description, int cost) 
+                    throws SQLException {
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(select);
+        stmt = conn.prepareStatement("SELECT * FROM course WHERE "
+                + "course_name = ?"
+                + " AND course_type = ?"
+                + " AND capacity = ?"
+                + " AND course_description = ?"
+                + " AND cost = ?");
+        stmt.setString(1, course_name);
+        stmt.setInt(2, course_type);
+        stmt.setInt(3, capacity);
+        stmt.setString(4, description);
+        stmt.setInt(5, cost);
         
-        ResultSetMetaData metaData = rs.getMetaData();
+        rs = stmt.executeQuery();
 
-        int numColumns = metaData.getColumnCount();
-        
-        Object obj = null;
         while (rs.next()) {
             if (rs.getObject(2).toString().matches(course_name)
                     && rs.getObject(3).toString().matches(Integer.toString(course_type))
@@ -113,44 +115,33 @@ public class CourseMenu {
         
         System.out.println("Please enter the new value");
         String new_value = scanner.next();
-        String update = "";
         
         if(attribute_name.matches("course_name") || attribute_name.matches("course_description")){
-            update = "UPDATE course "
-                    + "SET "
-                    + "course." + attribute_name + " = "
-                    + "'" + new_value + "'"
-                    + " WHERE course_id = "
-                    + course_id;
+            stmt = conn.prepareStatement("UPDATE course SET course."+ attribute_name 
+                    + "= ? WHERE course_id = ? ");
+            stmt.setString(1, new_value);
+            stmt.setInt(2, course_id);
         } else {
-            update = "UPDATE course "
-                    + "SET "
-                    + "course." + attribute_name + " = "
-                    + new_value
-                    + " WHERE course_id = "
-                    + course_id;
+            stmt = conn.prepareStatement("UPDATE course SET course." + attribute_name 
+                    + " = ? WHERE course_id = ? ");
+            stmt.setInt(1, Integer.valueOf(new_value));
+            stmt.setInt(2, course_id);
         }
         
-        stmt = conn.createStatement();
-        stmt.executeUpdate(update);
+        stmt.execute();
         
         checkCourseAttribute(rs, stmt, conn, course_id, attribute_name, new_value);
     }
     
-    private void checkCourseAttribute(ResultSet rs, PreparedStatement stmt, Connection conn, int course_id,
-            String attribute_name, String new_value ) throws SQLException {
-        String select = "SELECT " + attribute_name
-                + " FROM course"
-                + " WHERE course_id = " + course_id;
+    private void checkCourseAttribute(ResultSet rs, PreparedStatement stmt, Connection conn,
+            int course_id, String attribute_name, String new_value ) throws SQLException {
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(select);
+        stmt = conn.prepareStatement("SELECT " + attribute_name 
+                + " FROM course WHERE course_id = ?");
+        stmt.setInt(1, course_id);
         
-        ResultSetMetaData metaData = rs.getMetaData();
-
-        int numColumns = metaData.getColumnCount();
+        rs = stmt.executeQuery();
         
-        Object obj = null;
         while (rs.next()) {
             if (rs.getObject(1).toString().matches(new_value)) {
                 System.out.println("Success");
@@ -166,13 +157,11 @@ public class CourseMenu {
         System.out.println("Please enter a number for the course id");
         int course_id = scanner.nextInt();
         
-        String query = "SELECT *"
-                + " FROM course"
-                + " WHERE course_id = "
-                + course_id;
+        stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
+        stmt.setInt(1, course_id);
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(query);
+        rs = stmt.executeQuery();
+        
         String[] row = new String[6];
         // get metaData
         if(rs != null) {
@@ -184,7 +173,7 @@ public class CourseMenu {
             for (int i = 1; i <= numColumns; i++) {
                 row[i-1] = metaData.getColumnName(i);
             }
-            
+            System.out.println("Course Report:");
             printCourseRow(row);
             System.out.print("----------------------------------------------------"
                     + "-------------------------------------------------------------"
@@ -220,13 +209,10 @@ public class CourseMenu {
         System.out.println("Please enter a number for the course id");
         int course_id = scanner.nextInt();
         
-        String update = "DELETE"
-                + " FROM course"
-                + " WHERE course_id = "
-                + course_id;
+        stmt = conn.prepareStatement("DELETE FROM course WHERE course_id = ?");
+        stmt.setInt(1, course_id);
         
-        stmt = conn.createStatement();
-        stmt.executeUpdate(update);
+        stmt.execute();
         
         checkCourseDelete(rs, stmt, conn, course_id);
     }
@@ -234,18 +220,12 @@ public class CourseMenu {
         
     private void checkCourseDelete(ResultSet rs, PreparedStatement stmt, Connection conn, int course_id) 
             throws SQLException {
-        String select = "SELECT *"
-                + " FROM course"
-                + " WHERE course_id = " + course_id;
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(select);
+        stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
+        stmt.setInt(1, course_id);
         
-        ResultSetMetaData metaData = rs.getMetaData();
-
-        int numColumns = metaData.getColumnCount();
+        rs = stmt.executeQuery();
         
-        Object obj = null;
         if (!rs.next()) {
             System.out.println("Success");
         } else {
@@ -260,15 +240,15 @@ public class CourseMenu {
         System.out.println("Please enter a number for the course id");
         int course_id = scanner.nextInt();
         
-        String query = "SELECT person.full_name, student.student_id, course_enrollment.paid"
+        stmt = conn.prepareStatement("SELECT "
+                + "person.full_name, student.student_id, course_enrollment.paid"
                 + " FROM course_enrollment,student,person"
                 + " WHERE course_enrollment.student_id=student.student_id"
                 + " AND student.person_id=person.person_id"
-                + " AND course_enrollment.course_id= "
-                + course_id;
+                + " AND course_enrollment.course_id= ?");
+        stmt.setInt(1, course_id);
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(query);
+        rs = stmt.executeQuery();
         
         if(rs != null) {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -373,16 +353,19 @@ public class CourseMenu {
     
     private void executeCourseSchedule(ResultSet rs, PreparedStatement stmt, Connection conn, 
             String thisWeek, String weekLater) throws SQLException {
-        String query = "SELECT course_schedule.course_date, course.course_id, course.course_name, "
-                + "course.course_type, course.capacity, course.course_description, course.cost"
+        
+        stmt = conn.prepareStatement("SELECT course_schedule.course_date, course.course_id, "
+                + "course.course_name, course.course_type, course.capacity, "
+                + "course.course_description, course.cost "
                 + " FROM course,course_schedule"
                 + " WHERE course.course_id=course_schedule.course_id"
-                + " AND course_schedule.course_date >= '" + thisWeek + "'"
-                + " AND course_schedule.course_date < '" + weekLater + "'"
-                + " ORDER BY course_schedule.course_date";
+                + " AND course_schedule.course_date >= ?"
+                + " AND course_schedule.course_date < ?"
+                + " ORDER BY course_schedule.course_date");
+        stmt.setString(1,thisWeek);
+        stmt.setString(2, weekLater);
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(query);
+        rs = stmt.executeQuery();
         
         if(rs != null) {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -494,35 +477,33 @@ public class CourseMenu {
     private void createCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
             throws SQLException {
         System.out.println("Please enter a course type value between 1-30 characters");
-        String course_type = scanner.next();
+        String course_type_value = scanner.next();
         
-        String create = "INSERT INTO `course_type` "
-                + "(course_type_value) VALUES ('"
-                + course_type + "')";
+        stmt = conn.prepareStatement("INSERT INTO `course_type` "
+                + "(course_type_value) " 
+                + "VALUES (?)");
+        stmt.setString(1, course_type_value);
         
-        stmt = conn.createStatement();
-        stmt.executeUpdate(create);
+        stmt.execute();
         
-        checkCourseType(rs, stmt, conn, course_type);
+        checkCourseType(rs, stmt, conn, course_type_value);
         
     }
     
-    private void checkCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, String course_type)
+    private void checkCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            String course_type_value)
             throws SQLException {
-        String select = "SELECT * FROM course_type WHERE "
-                + "course_type_value = '" + course_type + "'";
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(select);
+        stmt = conn.prepareStatement("SELECT course_type_value FROM course_type WHERE "
+                + "course_type_value = ?");
+        stmt.setString(1, course_type_value);
         
-        ResultSetMetaData metaData = rs.getMetaData();
-
-        int numColumns = metaData.getColumnCount();
+        rs = stmt.executeQuery();
         
-        Object obj = null;
         while (rs.next()) {
-            if (rs.getObject(2).toString().matches(course_type)) {
+            if (rs.getObject(1).toString().matches(course_type_value)) {
                 System.out.println("Success");
+                return;
             } else {
                 System.out.print("Unable to complete request, please try again");
             }
@@ -538,14 +519,12 @@ public class CourseMenu {
         System.out.println("Please enter the new value for course_type_value");
         String new_value = scanner.next();
         
-        String update = "UPDATE course_type"
-                + " SET course_type_value = "
-                + "'" + new_value + "'"
-                + " WHERE course_type_id = "
-                + course_type_id;
+        stmt = conn.prepareStatement("UPDATE course_type SET course_type.course_type_value = ? "
+                + "WHERE course_type_id = ? ");
+        stmt.setString(1, new_value);
+        stmt.setInt(2, course_type_id);
         
-        stmt = conn.createStatement();
-        stmt.executeUpdate(update);
+        stmt.execute();
         
         checkCourseTypeAttribute(rs, stmt, conn, course_type_id, new_value);
         
@@ -553,14 +532,12 @@ public class CourseMenu {
     
     private void checkCourseTypeAttribute(ResultSet rs, PreparedStatement stmt, Connection conn, 
             int course_type_id, String new_value ) throws SQLException {
-        String select = "SELECT course_type_value"
-                + " FROM course_type"
-                + " WHERE course_type_id = " + course_type_id;
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(select);
+        stmt = conn.prepareStatement("SELECT course_type_value FROM course_type WHERE " 
+                + "course_type_id = ?");
+        stmt.setInt(1, course_type_id);
         
-        ResultSetMetaData metaData = rs.getMetaData();
+        rs = stmt.executeQuery();
 
         while (rs.next()) {
             if (rs.getObject(1).toString().matches(new_value)) {
@@ -577,13 +554,12 @@ public class CourseMenu {
         System.out.println("Please enter a number for the course_type_id");
         int course_type_id = scanner.nextInt();
         
-        String query = "SELECT *"
-                + " FROM course_type"
-                + " WHERE course_type_id = "
-                + course_type_id;
+        stmt = conn.prepareStatement("SELECT * FROM course_type WHERE "
+                + "course_type_id = ?");
+        stmt.setInt(1, course_type_id);
         
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(query);
+        rs = stmt.executeQuery();
+        
         String[] row = new String[6];
         // get metaData
         if(rs != null) {
@@ -624,28 +600,24 @@ public class CourseMenu {
             throws SQLException {
         System.out.println("Please enter a number for the course_type_id");
         int course_type_id = scanner.nextInt();
+        
+        stmt = conn.prepareStatement("DELETE FROM course_type WHERE course_type_id = ?");
+        stmt.setInt(1, course_type_id);
+        
+        stmt.execute();
 
-        String update = "DELETE" 
-        + " FROM course_type" 
-        + " WHERE course_type_id = " 
-        + course_type_id;
-
-        stmt = conn.createStatement();
-        stmt.executeUpdate(update);
-
-        checkCourseDelete(rs, stmt, conn, course_type_id);
+        checkCourseTypeDelete(rs, stmt, conn, course_type_id);
     }
 
     private void checkCourseTypeDelete(ResultSet rs, PreparedStatement stmt, Connection conn, 
             int course_type_id) throws SQLException {
-        String select = "SELECT *" 
-            + " FROM course_type" 
-            + " WHERE course_type_id = " 
-            + course_type_id;
-
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(select);
-
+        
+        stmt = conn.prepareStatement("SELECT * FROM course_type WHERE "
+                + "course_type_id = ?");
+        stmt.setInt(1, course_type_id);
+        
+        rs = stmt.executeQuery();
+        
         if (!rs.next()) {
             System.out.println("Success");
         } else {
