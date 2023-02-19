@@ -10,8 +10,13 @@ package emc;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.SQLException;
+import java.sql.Date;
 import java.util.Scanner;
+import java.util.InputMismatchException;
+
 
 public class StudentMenu {
 
@@ -23,7 +28,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void menu(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void menu(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
         int selection;
 
         while(true) {
@@ -31,7 +36,7 @@ public class StudentMenu {
             try {
                 selection = scanner.nextInt();
                 switch (selection){
-                    case 1: manageStudent(rs, stmt, conn, scanner); break;
+                    case 1: manageStudents(rs, stmt, conn, scanner); break;
                     case 2: studentEnrollment(rs, stmt, conn, scanner); break;
                     case 0: return;
                     default:
@@ -53,7 +58,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void manageStudents(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void manageStudents(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
         int selection;
 
         while(true) {
@@ -98,8 +103,13 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void createStudent(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        conn.setAutoCommit(false); // do not autocommit
+    public void createStudent(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) {
+
+        int birthMonth;
+        int birthDay;
+        int birthYear;
+        Date dateBirth;
+
 
         System.out.println("Please enter a Student name between 1-30 characters: ");
         String student_name = scanner.next();
@@ -109,20 +119,20 @@ public class StudentMenu {
 
         try {
             System.out.println("Please enter a numeric birth month value: ");
-            int birth_month = scanner.nextInt();
+            birthMonth = scanner.nextInt();
 
             System.out.println("Please enter birth day: ");
-            int birth_day = scanner.nextInt();
+            birthDay = scanner.nextInt();
 
             System.out.println("Please enter birth year: ");
-            int birth_year = scanner.nextInt();
+            birthYear = scanner.nextInt();
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
 
-        if (birth_month > 0 && birth_month < 13 && birth_day > 0 && birth_day < 32) {
-            Date date_birth = new Date(birth_year, birth_month, birth_day);
+        if (birthMonth > 0 && birthMonth < 13 && birthDay > 0 && birthDay < 32) {
+            dateBirth = new Date(birthYear, birthMonth, birthDay);
         } else {
             System.out.println("Birthday values out of range");
             return;
@@ -133,12 +143,13 @@ public class StudentMenu {
         String phone = scanner.next();
 
         try {
+            conn.setAutoCommit(false); // do not autocommit
             stmt = conn.prepareStatement(
                     "INSERT INTO person (full_name, address, date_birth, phone) " +
                             "VALUES (?, ?, ?, ?)");
             stmt.setString(1, student_name);
             stmt.setString(2, address);
-            stmt.setDate(3, date_birth);
+            stmt.setDate(3, dateBirth);
             stmt.setString(4, phone);
 
             int result = stmt.executeUpdate();
@@ -150,20 +161,20 @@ public class StudentMenu {
                                 "AND date_birth=? AND phone=?");
                 stmt.setString(1, student_name);
                 stmt.setString(2, address);
-                stmt.setDate(3, date_birth);
+                stmt.setDate(3, dateBirth);
                 stmt.setString(4, phone);
 
                 rs = stmt.executeQuery();
-                int person_id;
+                int personId = 0;
 
                 while (rs.next()) {
-                    person_id = rs.getInt(1);
+                    personId = rs.getInt(1);
                 }
 
-                if (person_id != null) { //success
-                    stmt = conn.prepareStatement("INSERT INTO student (person_id) VALUES (?)");
-                    stmt.setString(1, person_id);
-                    int result = stmt.executeUpdate();
+                if(personId != 0) { //success
+                    stmt = conn.prepareStatement("INSERT INTO student (personId) VALUES (?)");
+                    stmt.setInt(1, personId);
+                    result = stmt.executeUpdate();
 
                     if (result > 0) { //success
                         System.out.println("Successfully added Student!");
@@ -211,13 +222,11 @@ public class StudentMenu {
      * @throws SQLException
      */
     public void viewStudents(ResultSet rs, Statement stmt, Connection conn) {
+        PreparedStatement ps = null;
         try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(
+            ps = conn.prepareStatement(
                     "SELECT student.student_id,person.full_name " +
-                            "FROM student,person " +
-                            "WHERE student.person_id=person.person_id");
-
+                            "FROM student,person");
             System.out.printf("|%20s|%20s|\n","Student ID", "Name");
             System.out.println("________________________________________");
             while (rs.next()) {
@@ -230,8 +239,8 @@ public class StudentMenu {
                 if (conn != null) {
                     conn.close();
                 }
-                if (stmt != null) {
-                    stmt.close();
+                if (ps != null) {
+                    ps.close();
                 }
                 if (rs != null) {
                     rs.close();
@@ -258,12 +267,17 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void editStudent(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void editStudent(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
         conn.setAutoCommit(false); // do not autocommit
+        int birthMonth;
+        int birthDay;
+        int birthYear;
+        int studentId;
+        Date dateBirth = null;
 
         try {
             System.out.println("Please enter Student ID: ");
-            int student_id = scanner.nextInt();
+            studentId = scanner.nextInt();
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
@@ -279,23 +293,23 @@ public class StudentMenu {
         try {
             System.out.println("Month, day, and year must be entered to change birthday.");
             System.out.println("Enter a numeric birth month value: ");
-            int birth_month = scanner.nextInt();
+            birthMonth = scanner.nextInt();
 
             System.out.println("Enter birth day: ");
-            int birth_day = scanner.nextInt();
+            birthDay = scanner.nextInt();
 
             System.out.println("Enter birth year: ");
-            int birth_year = scanner.nextInt();
+            birthYear = scanner.nextInt();
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
 
-        if (birth_month > 0 && birth_month < 13 && birth_day > 0 and birth_day < 32) {
-            Date date_birth = new Date(birth_year, birth_month, birth_day);
+        if(birthMonth > 0 && birthMonth < 13 && birthDay > 0 && birthDay < 32) {
+            dateBirth = new Date(birthYear, birthMonth, birthDay);
         } else {
             System.out.println("Birthday values out of range");
-            date=birth_day = null;
+            birthDay = 0;
         }
 
         System.out.println("Please enter phone number (5555551234): ");
@@ -312,11 +326,11 @@ public class StudentMenu {
             statement += "full_name=?,";
             name = true;
         }
-        if (address != null ** !address.equals("")) {
+        if (address != null && !address.equals("")) {
             statement += "address=?,";
             addy = true;
         }
-        if (date_birth != null) {
+        if (dateBirth != null) {
             statement += "date_birth=?";
             bday = true;
         }
@@ -329,7 +343,7 @@ public class StudentMenu {
             statement = statement.substring(0, statement.length()-1);
         }
 
-        statement += " FROM person,student WHERE person.person_id=student.person_id AND student.student_id=?";
+        statement += " FROM person,student WHERE person.person_id=student.person_id AND student.studentId=?";
 
         if (name || addy || bday || tele) {
             try {
@@ -345,14 +359,14 @@ public class StudentMenu {
                     i++;
                 }
                 if (bday) {
-                    stmt.setString(i, date_birth);
+                    stmt.setDate(i, dateBirth);
                     i++;
                 }
                 if (tele) {
                     stmt.setString(i, phone);
                     i++;
                 }
-                stmt.setString(i, student_id);
+                stmt.setInt(i, studentId);
 
                 int result = stmt.executeUpdate();
 
@@ -402,7 +416,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void deleteStudent(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void deleteStudent(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
 
     }
 
@@ -419,7 +433,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void studentReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void studentReport(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
 
     }
 
@@ -431,7 +445,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void studentEnrollment(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void studentEnrollment(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
         int selection;
 
         while(true) {
@@ -466,7 +480,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void enrollStudent(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void enrollStudent(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
 
     }
 
@@ -480,7 +494,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void unenrollStudent(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void unenrollStudent(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
 
     }
 
@@ -494,7 +508,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void viewStudentEnrollment(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void viewStudentEnrollment(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
 
     }
 
@@ -511,7 +525,7 @@ public class StudentMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void editStudentEnrollment(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void editStudentEnrollment(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) throws SQLException {
 
     }
 
