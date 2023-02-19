@@ -40,8 +40,9 @@ public class Main {
         try {
             Class.forName(args[3]);
 
+            System.out.println("Connecting to database...");
             conn = DriverManager.getConnection(args[0], args[1], args[2]);
-
+            System.out.println("Connection Established.");
             
             
             try (Scanner scanner = new Scanner(System.in)) {
