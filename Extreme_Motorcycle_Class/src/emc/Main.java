@@ -15,11 +15,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.sql.PreparedStatement;
 
 public class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Extreme Motorcycle Class Database Management");
-        if (args.length != 4) {
+
+        if(args.length != 4) {
             System.out.println("USAGE: java emc.Main <url> <username> <password> <driver>");
             System.exit(0);
         }
@@ -27,6 +29,7 @@ public class Main {
         ResultSet rs = null;
         Statement stmt = null;
         Connection conn = null;
+        PreparedStatement ps = null;
         
         CourseMenu courseMenu = new CourseMenu();
         StudentMenu studentMenu = new StudentMenu();
@@ -37,8 +40,9 @@ public class Main {
         try {
             Class.forName(args[3]);
 
+            System.out.println("Connecting to database...");
             conn = DriverManager.getConnection(args[0], args[1], args[2]);
-
+            System.out.println("Connection Established.");
             
             
             try (Scanner scanner = new Scanner(System.in)) {
@@ -50,7 +54,7 @@ public class Main {
                         selection = scanner.nextInt();
                         switch (selection){
                         case 1: courseMenu.menu(rs, stmt, conn, scanner); break;
-                        case 2: studentMenu.menu(rs, stmt, conn, scanner); break;
+                        case 2: studentMenu.menu(rs, ps, conn, scanner); break;
                         case 3: garageMenu.menu(rs, stmt, conn, scanner); break;
                         case 4: staffMenu.menu(rs, stmt, conn, scanner); break;
                         case 5: infMenu.menu(rs, stmt, conn, scanner); break;
