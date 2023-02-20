@@ -11,9 +11,12 @@ package emc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class GarageMenu {
@@ -401,6 +404,60 @@ public class GarageMenu {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    // Helper method to print the contents of the result set including column name
+    private void printSet(ResultSet r) {
+        ResultSetMetaData rsmd = null;
+        int columnCount = 0;
+        List<String> columnNames = new ArrayList<String>();
+
+        // Load metadata from the result set
+        try {
+            rsmd = r.getMetaData();
+        } catch (SQLException e) {
+            System.out.println("Error getting metadata");
+            e.printStackTrace();
+            return;
+        }
+
+        // Read the column names
+        for (int i = 0; i < columnCount; i++) {
+            try {
+                columnNames.add(rsmd.getColumnName(i));
+            } catch (SQLException e) {
+                System.out.println("Error getting column name");
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        // Print the column names
+        for (int i = 0; i < columnCount; i++) {
+            int ds = 0;
+            try {
+                ds = rsmd.getColumnDisplaySize(i);
+            } catch (SQLException e) {
+                System.out.println("Error getting column display size");
+                e.printStackTrace();
+            }
+            System.out.printf("%-" + ds + "s", columnNames.get(i));
+        }
+
+        // Print the resultset
+        try {
+            while (r.next()) {
+                for (int i = 0; i < columnCount; i++) {
+                    rsmd.getColumnType(columnCount);
+                    int ds = rsmd.getColumnDisplaySize(i);
+                    System.out.printf("%-" + ds + "s", r.getString(columnNames.get(i)));
+                }
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error printing result set");
+            e.printStackTrace();
         }
     }
 }
