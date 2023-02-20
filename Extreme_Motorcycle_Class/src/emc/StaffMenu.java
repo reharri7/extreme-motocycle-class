@@ -1,5 +1,13 @@
 package emc;
 
+/**
+ * StaffMenu.java
+ *
+ * Prints and handles Staff sub menu.
+ *
+ * Group 4
+ */
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
