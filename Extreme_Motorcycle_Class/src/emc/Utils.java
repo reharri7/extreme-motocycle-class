@@ -82,7 +82,6 @@ public class Utils {
         }
 
         printColumnNames(columnNames, colMax);
-        System.out.println("|");
         printDivider(colMax);
         printContents(result, colMax);
 
