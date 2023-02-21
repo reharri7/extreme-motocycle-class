@@ -147,7 +147,25 @@ public class GarageMenu {
 
     private void viewBikeTypes(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bike types registered:");
-
+        String query = "SELECT * FROM bike_type";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void createBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -168,10 +186,12 @@ public class GarageMenu {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try {
-                ps.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -192,11 +212,25 @@ public class GarageMenu {
     }
 
     private void viewBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
-
-
-
+        String query = "SELECT * FROM problem";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void createBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -229,12 +263,12 @@ public class GarageMenu {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) {
+            if (ps != null) {
+                try {
                     ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -260,12 +294,12 @@ public class GarageMenu {
             e.printStackTrace();
         }
         finally {
-            try {
-                if (ps != null) {
+            if (ps != null) {
+                try {
                     ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         }
 
