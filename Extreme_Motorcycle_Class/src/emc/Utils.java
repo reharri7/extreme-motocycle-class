@@ -17,6 +17,7 @@ public class Utils {
     }
 
     public static void printSet(ResultSet r) {
+        // Used later to get metadata from the result set
         ResultSetMetaData rsmd = null;
 
         // Will hold the number of columns in the result set
