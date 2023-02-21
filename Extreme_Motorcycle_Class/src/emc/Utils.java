@@ -1,5 +1,7 @@
 package emc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -79,5 +81,36 @@ public class Utils {
             System.out.println("Error printing result set");
             e.printStackTrace();
         }
+    }
+
+    public static boolean columnExistsInTable(Connection conn, String column, String table) {
+        String query = "SELECT " + column + " FROM " + table + "LIMIT 1";
+        boolean exists = false;
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columns = rsmd.getColumnCount();
+            for (int i = 1; i <= columns; i++) {
+                if (rsmd.getColumnName(i).equals(column)) {
+                    exists = true;
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking column exists.  Please check the column name and table name.");
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return exists;
     }
 }
