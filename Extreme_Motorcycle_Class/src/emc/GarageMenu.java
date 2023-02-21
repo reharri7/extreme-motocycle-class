@@ -343,7 +343,7 @@ public class GarageMenu {
 
     private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bikes registered: ");
-        String query = "SELECT * FROM bike";
+        String query = "SELECT bike_id, brand, cc, broken FROM bike";
         try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
@@ -352,14 +352,7 @@ public class GarageMenu {
         }
 
         // Print the resultset
-        try {
-            while (rs.next()) {
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        Utils.printSet(rs);
     }
 
     private void createBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -404,60 +397,6 @@ public class GarageMenu {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    // Helper method to print the contents of the result set including column name
-    private void printSet(ResultSet r) {
-        ResultSetMetaData rsmd = null;
-        int columnCount = 0;
-        List<String> columnNames = new ArrayList<String>();
-
-        // Load metadata from the result set
-        try {
-            rsmd = r.getMetaData();
-        } catch (SQLException e) {
-            System.out.println("Error getting metadata");
-            e.printStackTrace();
-            return;
-        }
-
-        // Read the column names
-        for (int i = 0; i < columnCount; i++) {
-            try {
-                columnNames.add(rsmd.getColumnName(i));
-            } catch (SQLException e) {
-                System.out.println("Error getting column name");
-                e.printStackTrace();
-                return;
-            }
-        }
-
-        // Print the column names
-        for (int i = 0; i < columnCount; i++) {
-            int ds = 0;
-            try {
-                ds = rsmd.getColumnDisplaySize(i);
-            } catch (SQLException e) {
-                System.out.println("Error getting column display size");
-                e.printStackTrace();
-            }
-            System.out.printf("%-" + ds + "s", columnNames.get(i));
-        }
-
-        // Print the resultset
-        try {
-            while (r.next()) {
-                for (int i = 0; i < columnCount; i++) {
-                    rsmd.getColumnType(columnCount);
-                    int ds = rsmd.getColumnDisplaySize(i);
-                    System.out.printf("%-" + ds + "s", r.getString(columnNames.get(i)));
-                }
-                System.out.println();
-            }
-        } catch (SQLException e) {
-            System.out.println("Error printing result set");
-            e.printStackTrace();
         }
     }
 }
