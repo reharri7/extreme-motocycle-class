@@ -241,13 +241,36 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bikes ID: ");
         int bikeID = scanner.nextInt();
 
+        
+
     }
 
     private void bikeProblemReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
+        String query = "SELECT problem_date,repair_date,description,cost FROM problem WHERE bike_id=?";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, bikeID);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
     private void unassignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike assignment ID: ");
