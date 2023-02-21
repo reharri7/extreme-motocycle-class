@@ -143,6 +143,39 @@ public class GarageMenu {
         String newValue = scanner.next();
 
         /* Make a switch case to determine whether to cast the input to another type */
+        String[] validAttributes = {"bike_type_id", "bike_type_value"};
+        boolean validAttribute = false;
+        for (String s : validAttributes) {
+            if (s.equals(attribute)) {
+                validAttribute = true;
+                break;
+            }
+        }
+
+        if (!validAttribute) {
+            System.out.println("Invalid attribute");
+            return;
+        }
+
+        String query = "UPDATE bike_type SET " + attribute + "=? WHERE bike_type_id=?";
+
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, newValue);
+            ps.setInt(2, bikeTypeID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void viewBikeTypes(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -208,7 +241,44 @@ public class GarageMenu {
         
         /* TODO: Check to ensure valid column */
         /* TODO: Make a switch case to determine whether to cast the input to another type */
+        // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
+        String[] validAttributes = {"problem_id", "problem_date", "bike_id", "repair_date", "description", "cost"};
+        boolean validAttribute = false;
+        for (String s : validAttributes) {
+            if (s.equals(attribute)) {
+                validAttribute = true;
+                break;
+            }
+        }
 
+        if (!validAttribute) {
+            System.out.println("Invalid attribute");
+            return;
+        }
+
+        
+        String query = "UPDATE problem SET ?=? WHERE bike_id=?";
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, attribute);
+            ps.setString(2, newValue);
+            ps.setInt(3, bikeID);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void viewBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
