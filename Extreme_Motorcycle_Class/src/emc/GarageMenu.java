@@ -195,6 +195,8 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
+
+
     }
 
     private void createBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -241,7 +243,31 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bikes ID: ");
         int bikeID = scanner.nextInt();
 
-        
+        String query = "SELECT course_schedule.course_date,course.course_name "
+            + "FROM bike_assignment,course_schedule,course "
+            + "WHERE bike_assignment.course_schedule_id=course_schedule.course_schedule_id "
+            + "AND course_schedule.course_id=course.course_id "
+            + "AND bike_assignment.bike_id=?";
+
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, bikeID);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
