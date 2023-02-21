@@ -18,6 +18,14 @@ import java.util.Scanner;
 
 public class GarageMenu {
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     * @throws SQLException
+     */
     public void menu(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
         int selection;
 
@@ -106,6 +114,13 @@ public class GarageMenu {
         System.out.println("0. Main Menu");
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
@@ -129,6 +144,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
@@ -175,6 +197,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewBikeTypes(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bike types registered:");
         String query = "SELECT * FROM bike_type";
@@ -198,6 +227,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
         String bikeTypeName = scanner.next();
@@ -221,6 +257,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the problem ID: ");
         int problemID = scanner.nextInt();
@@ -244,6 +287,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -293,6 +343,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         String query = "SELECT * FROM problem";
         PreparedStatement ps = null;
@@ -315,6 +372,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -355,6 +419,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void bikeAssignmentReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bikes ID: ");
         int bikeID = scanner.nextInt();
@@ -387,6 +458,13 @@ public class GarageMenu {
 
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void bikeProblemReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -414,6 +492,13 @@ public class GarageMenu {
     }
 
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void unassignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike assignment ID: ");
         int bikeAssignmentID = scanner.nextInt();
@@ -439,6 +524,13 @@ public class GarageMenu {
 
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void assignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -469,6 +561,13 @@ public class GarageMenu {
 
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to delete: ");
         int bikeID = scanner.nextInt();
@@ -511,6 +610,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to edit: ");
         int bikeID = scanner.nextInt();
@@ -559,6 +665,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bikes registered: ");
         String query = "SELECT bike_id, brand, cc, broken FROM bike";
@@ -573,6 +686,13 @@ public class GarageMenu {
         Utils.printSet(rs);
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Enter the bike's brand between 1-30 characters: ");
         String brand = scanner.next();
