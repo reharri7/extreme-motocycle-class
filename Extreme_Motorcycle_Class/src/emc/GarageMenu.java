@@ -11,12 +11,9 @@ package emc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Scanner;
 
 public class GarageMenu {
@@ -257,8 +254,6 @@ public class GarageMenu {
         System.out.println("Please enter the new value for the attribute: ");
         String newValue = scanner.next();
         
-        /* TODO: Check to ensure valid column */
-        /* TODO: Make a switch case to determine whether to cast the input to another type */
         // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
         String[] validAttributes = {"problem_id", "problem_date", "bike_id", "repair_date", "description", "cost"};
         boolean validAttribute = false;
