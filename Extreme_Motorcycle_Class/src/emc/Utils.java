@@ -16,6 +16,10 @@ public class Utils {
         return LocalDate.of(year, month, day);
     }
 
+    
+    /** 
+     * @param r
+     */
     public static void printSet(ResultSet r) {
         // Used later to get metadata from the result set
         ResultSetMetaData rsmd = null;
@@ -87,6 +91,11 @@ public class Utils {
 
     }
 
+    
+    /** 
+     * @param colNames
+     * @param colMax
+     */
     private static void printColumnNames(List<String> colNames, int[] colMax) {
         // Print the column names
         for (int i = 0; i < colMax.length; i++) {
@@ -96,6 +105,10 @@ public class Utils {
         System.out.println("|");
     }
 
+    
+    /** 
+     * @param colMax
+     */
     private static void printDivider(int[] colMax) {
         for (int i = 0; i < colMax.length; i++) {
             System.out.print("|");
@@ -106,6 +119,11 @@ public class Utils {
         System.out.println("|");
     }
 
+    
+    /** 
+     * @param result
+     * @param colMax
+     */
     private static void printContents(ArrayList<ArrayList<String>> result, int[] colMax) {
         // Print the 2d array list of strings
         for (int i = 0; i < result.size(); i++) {
