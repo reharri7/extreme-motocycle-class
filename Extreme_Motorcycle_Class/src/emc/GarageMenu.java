@@ -478,12 +478,31 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike's ID you wish to delete: ");
         int bikeID = scanner.nextInt();
 
-        String query = "DELETE FROM bike WHERE bikeID = ?";
+        // Delete from bike
+        String query = "DELETE FROM bike WHERE bike_id=?";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
             System.out.println("Sucessfully deleted bike: " + bikeID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // Delete any references to the bike in bike_assignment
+        query = "DELETE FROM bike_assignment WHERE bike_id=?";
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, bikeID);
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
