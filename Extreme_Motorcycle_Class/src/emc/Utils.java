@@ -42,7 +42,7 @@ public class Utils {
         // Do not modify the loop values: the result sets column index from 1 while a List index starts at 0.  The plus ones are to compensate for this.
         for (int i = 0; i < columnCount; i++) {
             try {
-                columnNames.add(rsmd.getColumnName(i + 1));
+                columnNames.add(rsmd.getColumnName(i + 1).trim());
             } catch (SQLException e) {
                 System.out.println("Error getting column name");
                 e.printStackTrace();
@@ -50,36 +50,49 @@ public class Utils {
             }
         }
 
-        // Print the column names
+        // Read the result into a 2D array list of strings
+        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+
+        // Create an array to hold the maximum length of each column for formatting purposes
+        int[] colMax = new int[columnCount];
+        // Load the array with the length of the column names initially and then increase as needed when reading the result set
         for (int i = 0; i < columnCount; i++) {
-            int ds = 0;
-            try {
-                ds = rsmd.getColumnDisplaySize(i + 1);
-                if (ds == 0) { // If a display size is unavailable, use the length of the column name plus 5 padding characters
-                    ds = columnNames.get(i).length() + 5;
+            colMax[i] = columnNames.get(i).length() + 5;
+        }
+
+        try {
+            while(r.next()) {
+                ArrayList<String> row = new ArrayList<String>();
+                for (int i = 0; i < columnCount; i++) {
+                    try {
+                        row.add(r.getString(i + 1).trim());
+                        if (r.getString(i + 1).trim().length() > colMax[i]) {
+                            colMax[i] = r.getString(i + 1).trim().length() + 5;
+                        }
+                    } catch (SQLException e) {
+                        System.out.println("Error getting column value");
+                        e.printStackTrace();
+                        return;
+                    }
                 }
-            } catch (SQLException e) {
-                System.out.println("Error getting column display size");
-                e.printStackTrace();
+                result.add(row);
             }
-            // Build the formatting using the display size
-            System.out.printf("%-" + ds + "s", columnNames.get(i));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i < colMax.length; i++) {
+            System.out.printf("%-" + colMax[i] + "s", columnNames.get(i));
         }
         System.out.println();
 
-        // Print the resultset
-        try {
-            while (r.next()) {
-                for (int i = 0; i < columnCount; i++) {
-                    rsmd.getColumnType(columnCount);
-                    int ds = rsmd.getColumnDisplaySize(i + 1);
-                    System.out.printf("%-" + ds + "s", r.getString(columnNames.get(i)));
-                }
-                System.out.println();
+        // Print the 2d array list of strings
+        
+        for (int i = 0; i < result.size(); i++) {
+            for (int j = 0; j < result.get(i).size(); j++) {
+                System.out.printf("%-" + colMax[j] + "s", result.get(i).get(j));
             }
-        } catch (SQLException e) {
-            System.out.println("Error printing result set");
-            e.printStackTrace();
+            System.out.println();
         }
     }
 }
