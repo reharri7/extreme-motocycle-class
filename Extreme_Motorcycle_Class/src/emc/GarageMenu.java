@@ -508,7 +508,41 @@ public class GarageMenu {
         String newValue = scanner.next();
 
         /* Make a switch case to determine whether to cast the input to another type */
+        String[] validAttributes = {"bike_id", "brand", "type", "license_plate", "vin", "cc", "broken"};
+        boolean validAttribute = false;
+        for (String s : validAttributes) {
+            if (s.equals(attribute)) {
+                validAttribute = true;
+            }
+        }
 
+        if (!validAttribute) {
+            System.out.println("Invalid attribute");
+            return;
+        }
+
+        String query = "UPDATE bike SET " + attribute + "=? WHERE bike_id=?";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, newValue);
+            ps.setInt(2, bikeID);
+            ps.executeUpdate();
+            System.out.println("Sucessfully updated bike " + bikeID + " with new value " + newValue);
+        } 
+        catch (SQLException e) {
+            System.out.println("We were unable to update the bike. Are you sure the bike exists?");
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
