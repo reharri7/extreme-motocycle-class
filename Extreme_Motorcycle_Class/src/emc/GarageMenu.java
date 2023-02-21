@@ -113,7 +113,7 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
 
-        String query = "DELETE FROM bike_type WHERE bike_type_id = ?";
+        String query = "DELETE FROM bike_type WHERE bike_type_id=?";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -204,6 +204,24 @@ public class GarageMenu {
     private void createBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
         String bikeTypeName = scanner.next();
+
+        String query = "INSERT INTO bike_type VALUES (?)";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, bikeTypeName);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void deleteBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -256,7 +274,6 @@ public class GarageMenu {
             return;
         }
 
-        
         String query = "UPDATE problem SET ?=? WHERE bike_id=?";
         PreparedStatement ps = null;
 
