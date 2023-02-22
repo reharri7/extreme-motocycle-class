@@ -19,6 +19,22 @@ import static emc.Utils.printSet;
 
 public class StudentMenu {
 
+    private static final String CREATE_PERSON = "INSERT INTO person (full_name, address, date_birth, phone) VALUES (?, ?, ?, ?)";
+    private static final String SELECT_PERSON_BY_ID = "SELECT person_id FROM person WHERE full_name=? AND address=? AND date_birth=? AND phone=?";
+    private static final String CREATE_STUDENT = "INSERT INTO student (personId) VALUES (?)";
+    private static final String VIEW_STUDENTS = "SELECT student.student_id,person.full_name FROM student,person";
+    private static final String SELECT_STUDENT = "SELECT person_id FROM student WHERE student_id=?";
+    private static final String DELETE_PERSON = "DELETE FROM person WHERE person_id=?";
+    private static final String DELETE_COURSE_ENROLLMENT = "DELETE FROM course_enrollment WHERE student_id=?";
+    private static final String DELETE_STUDENT = "DELETE FROM student WHERE student_id=?";
+    private static final String STUDENT_REPORT = "SELECT course_enrollment.course_id, course.course_name, course_enrollment.paid FROM course_enrollment,course WHERE course_enrollment.course_id=course.course_id AND course_enrollment.student_id=?";
+    private static final String ENROLL_STUDENT = "INSERT INTO course_enrollment (course_id, student_id) VALUES (?, ?)";
+    private static final String UNENROLL_STUDENT = "DELETE FROM course_enrollment WHERE course_enrollment_id=?";
+    private static final String VIEW_ENROLLMENT = "SELECT * FROM course_enrollment WHERE course_enrollment_id=?";
+
+
+
+
     /**
      * Print student menu options and call appropriate method.
      * @param rs result set
@@ -139,9 +155,7 @@ public class StudentMenu {
 
         try {
             conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(
-                    "INSERT INTO person (full_name, address, date_birth, phone) " +
-                            "VALUES (?, ?, ?, ?)");
+            ps = conn.prepareStatement(CREATE_PERSON);
             ps.setString(1, student_name);
             ps.setString(2, address);
             ps.setDate(3, Date.valueOf(dateBirth));
@@ -150,10 +164,7 @@ public class StudentMenu {
             int result = ps.executeUpdate();
 
             if (result > 0) { //success
-                ps = conn.prepareStatement(
-                        "SELECT person_id FROM person " +
-                                "WHERE full_name=? AND address=? " +
-                                "AND date_birth=? AND phone=?");
+                ps = conn.prepareStatement(SELECT_PERSON_BY_ID);
                 ps.setString(1, student_name);
                 ps.setString(2, address);
                 ps.setDate(3, Date.valueOf(dateBirth));
@@ -167,7 +178,7 @@ public class StudentMenu {
                 }
 
                 if(personId != 0) { //success
-                    ps = conn.prepareStatement("INSERT INTO student (personId) VALUES (?)");
+                    ps = conn.prepareStatement(CREATE_STUDENT);
                     ps.setInt(1, personId);
                     result = ps.executeUpdate();
 
@@ -190,12 +201,8 @@ public class StudentMenu {
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
         } finally {
-            closeResource(rs, ps, conn);
+            closeResource(rs, ps, conn, scanner);
         }
-    }
-
-    private void closeResource(ResultSet rs, PreparedStatement ps, Connection conn) {
-        closeResource(rs, conn, ps);
     }
 
     /**
@@ -210,29 +217,13 @@ public class StudentMenu {
         Statement stmt = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT student.student_id,person.full_name FROM student,person");
+            rs = stmt.executeQuery(VIEW_STUDENTS);
             printSet(rs);
 
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
         } finally {
             closeResource(rs, conn, stmt);
-        }
-    }
-
-    private void closeResource(ResultSet rs, Connection conn, Statement stmt) {
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (rs != null) {
-                rs.close();
-            }
-        } catch (SQLException sqlx) {
-            System.out.println("SQL Exception when closing resources");
         }
     }
 
@@ -368,15 +359,7 @@ public class StudentMenu {
             } catch (SQLException sqlx) {
                 System.out.println("SQL Exception");
             } finally {
-                try {
-                    conn.close();
-                    if (ps != null) {
-                        ps.close();
-                    }
-                    conn.close();
-                } catch (SQLException sqlx) {
-                    System.out.println("SQL Exception when closing resources");
-                }
+                closeResource(ps, conn, scanner);
             }
         } else {
             System.out.println("No values to change");
@@ -411,8 +394,7 @@ public class StudentMenu {
 
         try {
             conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(
-                    "SELECT person_id FROM student WHERE student_id=?");
+            ps = conn.prepareStatement(SELECT_STUDENT);
             ps.setInt(1, studentId);
 
             rs = ps.executeQuery();
@@ -423,18 +405,18 @@ public class StudentMenu {
             }
 
             if(personId != 0) { //success, found person
-                ps = conn.prepareStatement("DELETE FROM person WHERE person_id=?");
+                ps = conn.prepareStatement(DELETE_PERSON);
                 ps.setInt(1, personId);
                 int result = ps.executeUpdate();
 
                 if (result > 0) { //success, deleted person
 //                        System.out.println("Successfully added Student!");
-                    ps = conn.prepareStatement("DELETE FROM course_enrollment WHERE student_id=?");
+                    ps = conn.prepareStatement(DELETE_COURSE_ENROLLMENT);
                     ps.setInt(1, studentId);
                     result = ps.executeUpdate();
 
                     if (result > 0) { //success, deleted course_enrollment
-                        ps = conn.prepareStatement("DELETE FROM student WHERE student_id=?");
+                        ps = conn.prepareStatement(DELETE_STUDENT);
                         ps.setInt(1, studentId);
                         result = ps.executeUpdate();
 
@@ -461,7 +443,7 @@ public class StudentMenu {
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
         } finally {
-            closeResource(rs, ps, conn);
+            closeResource(rs, ps, conn, scanner);
         }
     }
 
@@ -488,14 +470,14 @@ public class StudentMenu {
             return;
         }
 
+        print(rs, ps, conn, scanner, studentId, STUDENT_REPORT);
+    }
+
+    private void print(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner, int Id, String query) {
         try {
             conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(
-                    "SELECT course_enrollment.course_id, course.course_name, " +
-                            "course_enrollment.paid FROM course_enrollment,course " +
-                            "WHERE course_enrollment.course_id=course.course_id " +
-                            "AND course_enrollment.student_id=?");
-            ps.setInt(1, studentId);
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, Id);
 
             rs = ps.executeQuery();
             printSet(rs);
@@ -503,7 +485,7 @@ public class StudentMenu {
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
         } finally {
-            closeResource(rs, ps, conn);
+            closeResource(rs, ps, conn, scanner);
         }
     }
 
@@ -566,8 +548,7 @@ public class StudentMenu {
 
         try {
             conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(
-                    "INSERT INTO course_enrollment (course_id, student_id) VALUES (?, ?)");
+            ps = conn.prepareStatement(ENROLL_STUDENT);
             ps.setInt(1, courseId);
             ps.setInt(2, studentId);
 
@@ -584,16 +565,7 @@ public class StudentMenu {
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
         } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (SQLException sqlx) {
-                System.out.println("SQL Exception when closing resources");
-            }
+            closeResource(ps, conn, scanner);
         }
     }
 
@@ -619,8 +591,7 @@ public class StudentMenu {
 
         try {
             conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(
-                    "DELETE FROM course_enrollment WHERE course_enrollment_id=?");
+            ps = conn.prepareStatement(UNENROLL_STUDENT);
             ps.setInt(1, courseEnrollmentId);
 
             int result = ps.executeUpdate();
@@ -636,16 +607,7 @@ public class StudentMenu {
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
         } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (SQLException sqlx) {
-                System.out.println("SQL Exception when closing resources");
-            }
+            closeResource(ps, conn, scanner);
         }
     }
 
@@ -669,20 +631,7 @@ public class StudentMenu {
             return;
         }
 
-        try {
-            conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(
-                    "SELECT * FROM course_enrollment WHERE course_enrollment_id=?");
-            ps.setInt(1, courseEnrollmentId);
-
-            rs = ps.executeQuery();
-            printSet(rs);
-
-        } catch (SQLException sqlx) {
-            System.out.println("SQL Exception");
-        } finally {
-            closeResource(rs, ps, conn);
-        }
+        print(rs, ps, conn, scanner, courseEnrollmentId, VIEW_ENROLLMENT);
     }
 
     /**
@@ -765,15 +714,7 @@ public class StudentMenu {
             } catch (SQLException sqlx) {
                 System.out.println("SQL Exception");
             } finally {
-                try {
-                    conn.close();
-                    if (ps != null) {
-                        ps.close();
-                    }
-                    conn.close();
-                } catch (SQLException sqlx) {
-                    System.out.println("SQL Exception when closing resources");
-                }
+                closeResource(ps, conn, scanner);
             }
         } else {
             System.out.println("No values to change");
@@ -813,6 +754,57 @@ public class StudentMenu {
         System.out.println("3. View Student Enrollment");
         System.out.println("4. Edit Student Enrollment");
         System.out.println("0. Student Menu");
+    }
+
+    private void closeResource(PreparedStatement ps, Connection conn, Scanner scanner) {
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (scanner != null) {
+                scanner.close();
+            }
+        } catch (SQLException sqlx) {
+            System.out.println("SQL Exception when closing resources");
+        }
+    }
+
+    private void closeResource(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
+            if (scanner != null) {
+                scanner.close();
+            }
+        } catch (SQLException sqlx) {
+            System.out.println("SQL Exception when closing resources");
+        }
+    }
+
+    private void closeResource(ResultSet rs, Connection conn, Statement stmt) {
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
+        } catch (SQLException sqlx) {
+            System.out.println("SQL Exception when closing resources");
+        }
     }
 
 }
