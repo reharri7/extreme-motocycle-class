@@ -10,8 +10,7 @@ import java.util.Scanner;
 
 public class CourseMenu {
 
-    public void menu(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    public void menu(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) {
         int selection;
         
         while(true) {
@@ -42,7 +41,7 @@ public class CourseMenu {
 
 
     private void createCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
-            Scanner scanner) throws SQLException {
+            Scanner scanner) {
         
             System.out.println("Please enter a course name between 1-30 characters");
             String course_name = scanner.next();
@@ -59,106 +58,227 @@ public class CourseMenu {
             System.out.println("Please enter a number for the cost");
             int cost = scanner.nextInt();
             
-            stmt = conn.prepareStatement("INSERT INTO `course` "
-                    + "(course_name, course_type, capacity, course_description, cost) " 
-                    + "VALUES (?, ?, ?, ?, ?)");
+            try {
+                stmt = conn.prepareStatement("INSERT INTO `course` "
+                        + "(course_name, course_type, capacity, course_description, cost) " 
+                        + "VALUES (?, ?, ?, ?, ?)");
+                stmt.setString(1, course_name);
+                stmt.setInt(2, course_type);
+                stmt.setInt(3, capacity);
+                stmt.setString(4, description);
+                stmt.setInt(5, cost);
+            
+                stmt.execute();
+                checkCourse(rs, stmt, conn, course_name, course_type, capacity, description, cost);
+            } catch(SQLException e) {
+                printCreateCourseError(e.getMessage(), rs, stmt, conn, scanner);
+            }
+            
+    }
+    
+    private void printCreateCourseError(String e, ResultSet rs, PreparedStatement stmt, 
+            Connection conn, Scanner scanner) {
+        System.out.println(e);
+        System.out.println("Could not add course");
+        if(e.contains("Data truncation: Data too long for column 'course_name'")) {
+            System.out.println("course_name too long. Max is 30 characters.");
+        } else if(e.contains("Data truncation: Data too long for column 'course_description'")) {
+            System.out.println("course_description too long. Max is 150 characters.");
+        } else if(e.contains("FOREIGN KEY (`course_type`)")) {
+            System.out.println("That course_type does not exist. Please choose from:");
+            viewAllCourseType(rs, stmt, conn);
+        } else {
+            System.out.println(e);
+        }
+    }
+    
+
+    private void checkCourse(ResultSet rs, PreparedStatement stmt, Connection conn,  
+            String course_name, int course_type, int capacity, String description, int cost) {
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course WHERE "
+                    + "course_name = ?"
+                    + " AND course_type = ?"
+                    + " AND capacity = ?"
+                    + " AND course_description = ?"
+                    + " AND cost = ?");
             stmt.setString(1, course_name);
             stmt.setInt(2, course_type);
             stmt.setInt(3, capacity);
             stmt.setString(4, description);
             stmt.setInt(5, cost);
             
-            stmt.execute();
-            checkCourse(rs, stmt, conn, course_name, course_type, capacity, description, cost);
-    }
+            rs = stmt.executeQuery();
     
-
-    private void checkCourse(ResultSet rs, PreparedStatement stmt, Connection conn,  
-            String course_name, int course_type, int capacity, String description, int cost) 
-                    throws SQLException {
-        
-        stmt = conn.prepareStatement("SELECT * FROM course WHERE "
-                + "course_name = ?"
-                + " AND course_type = ?"
-                + " AND capacity = ?"
-                + " AND course_description = ?"
-                + " AND cost = ?");
-        stmt.setString(1, course_name);
-        stmt.setInt(2, course_type);
-        stmt.setInt(3, capacity);
-        stmt.setString(4, description);
-        stmt.setInt(5, cost);
-        
-        rs = stmt.executeQuery();
-
-        while (rs.next()) {
-            if (rs.getObject(2).toString().matches(course_name)
-                    && rs.getObject(3).toString().matches(Integer.toString(course_type))
-                    && rs.getObject(4).toString().matches(Integer.toString(capacity))
-                    && rs.getObject(5).toString().matches(description)
-                    && rs.getObject(6).toString().matches(Integer.toString(cost))) {
-                System.out.println("Success");
-            } else {
-                System.out.print("Unable to complete request, please try again");
+            while (rs.next()) {
+                if (rs.getObject(2).toString().matches(course_name)
+                        && rs.getObject(3).toString().matches(Integer.toString(course_type))
+                        && rs.getObject(4).toString().matches(Integer.toString(capacity))
+                        && rs.getObject(5).toString().matches(description)
+                        && rs.getObject(6).toString().matches(Integer.toString(cost))) {
+                    System.out.println("Success");
+                } else {
+                    System.out.print("Unable to complete request, please try again");
+                }
+                System.out.println("");
             }
-            System.out.println("");
+        } catch(SQLException e) {
+            System.out.println(e);
         }
     }
     
-    private void editCourse(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void editCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
         System.out.println("Please enter a number for the course id");
         int course_id = scanner.nextInt();
         
         System.out.println("Please enter the attribute to change");
         String attribute_name = scanner.next();
         
-        System.out.println("Please enter the new value");
-        String new_value = scanner.next();
-        
-        if(attribute_name.matches("course_name") || attribute_name.matches("course_description")){
-            stmt = conn.prepareStatement("UPDATE course SET course."+ attribute_name 
-                    + "= ? WHERE course_id = ? ");
-            stmt.setString(1, new_value);
-            stmt.setInt(2, course_id);
-        } else {
-            stmt = conn.prepareStatement("UPDATE course SET course." + attribute_name 
-                    + " = ? WHERE course_id = ? ");
-            stmt.setInt(1, Integer.valueOf(new_value));
-            stmt.setInt(2, course_id);
+        try {
+            if(attribute_name.matches("course_name") 
+                    || attribute_name.matches("course_description")){
+                
+                System.out.println("Please enter the new value");
+                String new_value = scanner.next();
+                
+                stmt = conn.prepareStatement("UPDATE course SET course."+ attribute_name 
+                        + "= ? WHERE course_id = ? ");
+                stmt.setString(1, new_value);
+                stmt.setInt(2, course_id);
+                
+                stmt.execute();
+                
+                checkCourseAttribute(rs, stmt, conn, course_id, attribute_name, new_value);
+            } else if(attribute_name.matches("capacity") || attribute_name.matches("cost") ||
+                    attribute_name.matches("course_type")) {
+                System.out.println("Please enter the new value");
+                int new_value = scanner.nextInt();
+                
+                stmt = conn.prepareStatement("UPDATE course SET course." + attribute_name 
+                        + " = ? WHERE course_id = ? ");
+                stmt.setInt(1, new_value);
+                stmt.setInt(2, course_id);
+                
+                stmt.execute();
+                
+                checkCourseAttribute(rs, stmt, conn, course_id, attribute_name, 
+                        Integer.toString(new_value));
+            } else {
+                System.out.println("That is not a valid attribute for course");
+                return;
+            }
+            
+        } catch(SQLException e) {
+            System.out.println(e);
         }
-        
-        stmt.execute();
-        
-        checkCourseAttribute(rs, stmt, conn, course_id, attribute_name, new_value);
+    }
+    
+    private void printCourseColumn(ResultSet rs, PreparedStatement stmt, Connection conn) {
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course");
+            
+            rs = stmt.executeQuery();
+            
+            String[] row = new String[6];
+            // get metaData
+            if(rs != null) {
+                
+                ResultSetMetaData metaData = rs.getMetaData();
+                
+                //print column headers
+                int numColumns = metaData.getColumnCount();
+                for (int i = 1; i <= numColumns; i++) {
+                    row[i-1] = metaData.getColumnName(i);
+                }
+                System.out.println("Course Report:");
+                printCourseRow(row);
+                System.out.print("----------------------------------------------------"
+                        + "-------------------------------------------------------------"
+                        + "---------------------------------------------------------\n");
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
     
     private void checkCourseAttribute(ResultSet rs, PreparedStatement stmt, Connection conn,
-            int course_id, String attribute_name, String new_value ) throws SQLException {
+            int course_id, String attribute_name, String new_value ) {
+        boolean found = false;
         
-        stmt = conn.prepareStatement("SELECT " + attribute_name 
-                + " FROM course WHERE course_id = ?");
-        stmt.setInt(1, course_id);
-        
-        rs = stmt.executeQuery();
-        
-        while (rs.next()) {
-            if (rs.getObject(1).toString().matches(new_value)) {
-                System.out.println("Success");
-            } else {
-                System.out.print("Unable to complete request, please try again");
+        try {
+            stmt = conn.prepareStatement("SELECT " + attribute_name 
+                    + " FROM course WHERE course_id = ?");
+            stmt.setInt(1, course_id);
+            
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                found = true;
+                if (rs.getObject(1).toString().matches(new_value)) {
+                    System.out.println("Success");
+                } else {
+                    System.out.print("Unable to complete request, please try again");
+                }
+                System.out.println("");
             }
-            System.out.println("");
+            if(!found) {
+                System.out.println("No Course with that ID. Please select from:");
+                viewAllCourses(rs, stmt, conn);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
         }
     }
     
-    private void viewCourse(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void viewCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
         System.out.println("Please enter a number for the course id");
         int course_id = scanner.nextInt();
-        
-        stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
-        stmt.setInt(1, course_id);
+        boolean found = false;
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
+            stmt.setInt(1, course_id);
+            
+            rs = stmt.executeQuery();
+            
+            
+            String[] row = new String[6];
+            // get metaData
+            if(rs != null) {
+                
+                ResultSetMetaData metaData = rs.getMetaData();
+                
+                //print column headers
+                int numColumns = metaData.getColumnCount();
+                printCourseColumn(rs, stmt, conn);
+                //print results
+                Object obj = null;
+                while (rs.next()) {
+                    found = true;
+                    for (int i = 1; i <= numColumns; i++) {
+                        obj = rs.getObject(i);
+                        if (obj != null) {
+                            row[i-1] = rs.getObject(i).toString();
+                        }
+                    } 
+                    printCourseRow(row);
+                }
+                if(!found) {
+                    System.out.println("No course exists with that ID. Please select from: ");
+                    viewAllCourses(rs, stmt, conn);
+                    return;
+                }
+                
+               
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void viewAllCourses(ResultSet rs, PreparedStatement stmt, Connection conn) {
+        try {
+        stmt = conn.prepareStatement("SELECT * FROM course");
         
         rs = stmt.executeQuery();
         
@@ -170,14 +290,7 @@ public class CourseMenu {
             
             //print column headers
             int numColumns = metaData.getColumnCount();
-            for (int i = 1; i <= numColumns; i++) {
-                row[i-1] = metaData.getColumnName(i);
-            }
-            System.out.println("Course Report:");
-            printCourseRow(row);
-            System.out.print("----------------------------------------------------"
-                    + "-------------------------------------------------------------"
-                    + "---------------------------------------------------------\n");
+            printCourseColumn(rs, stmt, conn);
             //print results
             Object obj = null;
             while (rs.next()) {
@@ -187,9 +300,13 @@ public class CourseMenu {
                         row[i-1] = rs.getObject(i).toString();
                     }
                 }
+                printCourseRow(row);
             }
             
-            printCourseRow(row);
+            
+        }
+        } catch (SQLException e){
+            e.printStackTrace();
         }
     }
     
@@ -204,92 +321,101 @@ public class CourseMenu {
         System.out.println("");
     }
         
-    private void deleteCourse(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
-        System.out.println("Please enter a number for the course id");
-        int course_id = scanner.nextInt();
+    private void deleteCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
         
-        stmt = conn.prepareStatement("DELETE FROM course WHERE course_id = ?");
-        stmt.setInt(1, course_id);
-        
-        stmt.execute();
-        
-        checkCourseDelete(rs, stmt, conn, course_id);
-    }
-    
-        
-    private void checkCourseDelete(ResultSet rs, PreparedStatement stmt, Connection conn, int course_id) 
-            throws SQLException {
-        
-        stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
-        stmt.setInt(1, course_id);
-        
-        rs = stmt.executeQuery();
-        
-        if (!rs.next()) {
-            System.out.println("Success");
-        } else {
-            System.out.print("Unable to complete request, please try again");
+        try {
+            System.out.println("Please enter a number for the course id");
+            int course_id = scanner.nextInt();
+            
+            stmt = conn.prepareStatement("DELETE FROM course WHERE course_id = ?");
+            stmt.setInt(1, course_id);
+            
+            stmt.execute();
+            
+            checkCourseDelete(rs, stmt, conn, course_id);
+        } catch (SQLException e){
+            e.printStackTrace();
         }
-        System.out.println("");
+    }
+    
+        
+    private void checkCourseDelete(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            int course_id)  {
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
+            stmt.setInt(1, course_id);
+            
+            rs = stmt.executeQuery();
+            
+            if (!rs.next()) {
+                System.out.println("Success");
+            } else {
+                System.out.print("Unable to complete request, please try again");
+            }
+            System.out.println("");
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
         
     }
 
-    private void courseReport(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void courseReport(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
+        boolean found = false;
+        
         System.out.println("Please enter a number for the course id");
         int course_id = scanner.nextInt();
         
-        stmt = conn.prepareStatement("SELECT "
-                + "person.full_name, student.student_id, course_enrollment.paid"
-                + " FROM course_enrollment,student,person"
-                + " WHERE course_enrollment.student_id=student.student_id"
-                + " AND student.person_id=person.person_id"
-                + " AND course_enrollment.course_id= ?");
-        stmt.setInt(1, course_id);
-        
-        rs = stmt.executeQuery();
-        
-        if(rs != null) {
-            ResultSetMetaData metaData = rs.getMetaData();
-                
-            int numColumns = metaData.getColumnCount();
-            String[] strings = new String[3];
-            for (int i = 1; i <= numColumns; i++) {
-                if (i <= 3) {
-                    strings[i-1] = metaData.getColumnLabel(i);
-
-                }
-
-                if (i >= 3) {
-                    System.out.printf("|%20s|%20s|%12s|", strings[0], strings[1], strings[2]);
-                    System.out.println("\n-------------------------------" 
-                    + "-----------------------------");
-                }
-            }
-        
-            Object obj = null;
-            while (rs.next()) {
+        try {
+            stmt = conn.prepareStatement("SELECT "
+                    + "person.full_name, student.student_id, course_enrollment.paid"
+                    + " FROM course_enrollment,student,person"
+                    + " WHERE course_enrollment.student_id=student.student_id"
+                    + " AND student.person_id=person.person_id"
+                    + " AND course_enrollment.course_id= ?");
+            stmt.setInt(1, course_id);
+            
+            rs = stmt.executeQuery();
+            
+            if(rs != null) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                    
+                int numColumns = metaData.getColumnCount();
+                String[] strings = new String[3];
                 for (int i = 1; i <= numColumns; i++) {
-                    obj = rs.getObject(i);
-                    if (obj != null) {
-                        if (i <= 3) {
-                            strings[i-1] = obj.toString();
-                        }
-                        if (i >= 3) {
-                            System.out.printf("|%20s|%20s|%12s|", strings[0], strings[1], strings[2]);
-                            System.out.print("\n");
-                        }
+                    if (i <= 3) {
+                        strings[i-1] = metaData.getColumnLabel(i);
                     }
-
                 }
-
+                System.out.printf("|%20s|%20s|%12s|", strings[0], strings[1], strings[2]);
+                System.out.println("\n--------------------------------------------------------");
+            
+                while (rs.next()) {
+                    found = true;
+                    for (int i = 1; i <= numColumns; i++) {
+                        if (i <= 3) {
+                            strings[i-1] = rs.getObject(i).toString();
+                        }
+    
+                    }
+                    System.out.printf("|%20s|%20s|%12s|", strings[0], strings[1], strings[2]);
+                                System.out.print("\n");
+    
+                }
             }
-        } 
+            if(!found) {
+                System.out.println("No course with that id. Please choose from:");
+                viewAllCourses(rs, stmt, conn);
+                return;
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
     }
     
-    private void weeklyCourseReport(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void weeklyCourseReport(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
         boolean correctInput = false;
         int year = 0;
         int month = 0;
@@ -352,64 +478,65 @@ public class CourseMenu {
     }
     
     private void executeCourseSchedule(ResultSet rs, PreparedStatement stmt, Connection conn, 
-            String thisWeek, String weekLater) throws SQLException {
-        
-        stmt = conn.prepareStatement("SELECT course_schedule.course_date, course.course_id, "
-                + "course.course_name, course.course_type, course.capacity, "
-                + "course.course_description, course.cost "
-                + " FROM course,course_schedule"
-                + " WHERE course.course_id=course_schedule.course_id"
-                + " AND course_schedule.course_date >= ?"
-                + " AND course_schedule.course_date < ?"
-                + " ORDER BY course_schedule.course_date");
-        stmt.setString(1,thisWeek);
-        stmt.setString(2, weekLater);
-        
-        rs = stmt.executeQuery();
-        
-        if(rs != null) {
-            ResultSetMetaData metaData = rs.getMetaData();
-                
-            int numColumns = metaData.getColumnCount();
-            String[] strings = new String[7];
-            for (int i = 1; i <= numColumns; i++) {
-                if (i <= 7) {
-                    strings[i-1] = metaData.getColumnLabel(i);
-
-                }
-
-                if (i >= 7) {
-                    System.out.printf("|%-11s|%-9s|%-30s|%-11s|%-8s|%-100s|%5s|", 
-                            strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], 
-                            strings[6]);
-                    System.out.println("\n-------------------------------------------" 
-                    + "-----------------------------------------------"
-                    + "-----------------------------------------------"
-                    + "---------------------------------------------");
-                }
-            }
-        
-            Object obj = null;
-            while (rs.next()) {
+            String thisWeek, String weekLater) {
+        try {
+            stmt = conn.prepareStatement("SELECT course_schedule.course_date, course.course_id, "
+                    + "course.course_name, course.course_type, course.capacity, "
+                    + "course.course_description, course.cost "
+                    + " FROM course,course_schedule"
+                    + " WHERE course.course_id=course_schedule.course_id"
+                    + " AND course_schedule.course_date >= ?"
+                    + " AND course_schedule.course_date < ?"
+                    + " ORDER BY course_schedule.course_date");
+            stmt.setString(1,thisWeek);
+            stmt.setString(2, weekLater);
+            
+            rs = stmt.executeQuery();
+            
+            if(rs != null) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                    
+                int numColumns = metaData.getColumnCount();
+                String[] strings = new String[7];
                 for (int i = 1; i <= numColumns; i++) {
-                    obj = rs.getObject(i);
-                    if (obj != null) {
-                        if (i <= 7) {
-                            strings[i-1] = obj.toString();
-                        }
-                        if (i >= 7) {
-                            System.out.printf("|%-11s|%-9s|%-30s|%-11s|%-8s|%-100s|%5s|", 
-                                    strings[0], strings[1], strings[2], strings[3], strings[4], 
-                                    strings[5], strings[6]);
-                            System.out.print("\n");
-                        }
+                    if (i <= 7) {
+                        strings[i-1] = metaData.getColumnLabel(i);
+    
                     }
-
+    
+                    if (i >= 7) {
+                        System.out.printf("|%-11s|%-9s|%-30s|%-11s|%-8s|%-100s|%5s|", 
+                                strings[0], strings[1], strings[2], strings[3], strings[4], 
+                                strings[5], strings[6]);
+                        System.out.println("\n-------------------------------------------" 
+                        + "-----------------------------------------------"
+                        + "-----------------------------------------------"
+                        + "---------------------------------------------");
+                    }
                 }
-
+            
+                Object obj = null;
+                while (rs.next()) {
+                    for (int i = 1; i <= numColumns; i++) {
+                        obj = rs.getObject(i);
+                        if (obj != null) {
+                            if (i <= 7) {
+                                strings[i-1] = obj.toString();
+                            }
+                            if (i >= 7) {
+                                System.out.printf("|%-11s|%-9s|%-30s|%-11s|%-8s|%-100s|%5s|", 
+                                        strings[0], strings[1], strings[2], strings[3], strings[4], 
+                                        strings[5], strings[6]);
+                                System.out.print("\n");
+                            }
+                        }
+    
+                    }
+    
+                }
             }
-        }else {
-            System.out.println("no");
+        } catch(SQLException e) {
+            e.printStackTrace();
         }
     }
     
@@ -474,119 +601,196 @@ public class CourseMenu {
         
     }
     
-    private void createCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void createCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
         System.out.println("Please enter a course type value between 1-30 characters");
         String course_type_value = scanner.next();
         
-        stmt = conn.prepareStatement("INSERT INTO `course_type` "
-                + "(course_type_value) " 
-                + "VALUES (?)");
-        stmt.setString(1, course_type_value);
-        
-        stmt.execute();
-        
-        checkCourseType(rs, stmt, conn, course_type_value);
-        
-    }
-    
-    private void checkCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
-            String course_type_value)
-            throws SQLException {
-        
-        stmt = conn.prepareStatement("SELECT course_type_value FROM course_type WHERE "
-                + "course_type_value = ?");
-        stmt.setString(1, course_type_value);
-        
-        rs = stmt.executeQuery();
-        
-        while (rs.next()) {
-            if (rs.getObject(1).toString().matches(course_type_value)) {
-                System.out.println("Success");
-                return;
-            } else {
-                System.out.print("Unable to complete request, please try again");
+        try {
+            stmt = conn.prepareStatement("INSERT INTO `course_type` "
+                    + "(course_type_value) " 
+                    + "VALUES (?)");
+            stmt.setString(1, course_type_value);
+            
+            stmt.execute();
+            
+            checkCourseType(rs, stmt, conn, course_type_value);
+        } catch(SQLException e) {
+            String msg = e.getMessage();
+            if(msg.contains("Data too long for column 'course_type_value'")){
+                System.out.println("course_type_value is too long. Max length 30 characters.");
             }
-            System.out.println("");
         }
     }
     
-    private void editCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
-        System.out.println("Please enter a number for the course_type_id");
-        int course_type_id = scanner.nextInt();
-        
-        System.out.println("Please enter the new value for course_type_value");
-        String new_value = scanner.next();
-        
-        stmt = conn.prepareStatement("UPDATE course_type SET course_type.course_type_value = ? "
-                + "WHERE course_type_id = ? ");
-        stmt.setString(1, new_value);
-        stmt.setInt(2, course_type_id);
-        
-        stmt.execute();
-        
-        checkCourseTypeAttribute(rs, stmt, conn, course_type_id, new_value);
+    private void checkCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            String course_type_value) {
+        try {
+            stmt = conn.prepareStatement("SELECT course_type_value FROM course_type WHERE "
+                    + "course_type_value = ?");
+            stmt.setString(1, course_type_value);
+            
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                if (rs.getObject(1).toString().matches(course_type_value)) {
+                    System.out.println("Success");
+                    return;
+                } else {
+                    System.out.print("Unable to complete request, please try again");
+                }
+                System.out.println("");
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void editCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
+        try {
+            System.out.println("Please enter a number for the course_type_id");
+            int course_type_id = scanner.nextInt();
+            
+            System.out.println("Please enter the new value for course_type_value");
+            String new_value = scanner.next();
+            
+            stmt = conn.prepareStatement("UPDATE course_type SET course_type.course_type_value = ? "
+                    + "WHERE course_type_id = ? ");
+            stmt.setString(1, new_value);
+            stmt.setInt(2, course_type_id);
+            
+            stmt.execute();
+            
+            checkCourseTypeAttribute(rs, stmt, conn, course_type_id, new_value);
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
         
     }
     
     private void checkCourseTypeAttribute(ResultSet rs, PreparedStatement stmt, Connection conn, 
-            int course_type_id, String new_value ) throws SQLException {
+            int course_type_id, String new_value ) {
+        boolean found = false;
         
-        stmt = conn.prepareStatement("SELECT course_type_value FROM course_type WHERE " 
-                + "course_type_id = ?");
-        stmt.setInt(1, course_type_id);
-        
-        rs = stmt.executeQuery();
-
-        while (rs.next()) {
-            if (rs.getObject(1).toString().matches(new_value)) {
-                System.out.println("Success");
-            } else {
-                System.out.print("Unable to complete request, please try again");
+        try {
+            stmt = conn.prepareStatement("SELECT course_type_value FROM course_type WHERE " 
+                    + "course_type_id = ?");
+            stmt.setInt(1, course_type_id);
+            
+            rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                found = true;
+                if (rs.getObject(1).toString().matches(new_value)) {
+                    System.out.println("Success");
+                } else {
+                    System.out.print("Unable to complete request, please try again");
+                }
+                System.out.println("");
             }
-            System.out.println("");
+            
+            if(!found) {
+                System.out.println("No course_type with that id. Please chose from:");
+                viewAllCourseType(rs, stmt, conn);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
         }
     }
     
-    private void viewCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void viewCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner) {
         System.out.println("Please enter a number for the course_type_id");
         int course_type_id = scanner.nextInt();
-        
-        stmt = conn.prepareStatement("SELECT * FROM course_type WHERE "
-                + "course_type_id = ?");
-        stmt.setInt(1, course_type_id);
-        
-        rs = stmt.executeQuery();
-        
-        String[] row = new String[6];
-        // get metaData
-        if(rs != null) {
+        boolean found = false;
+        boolean header = true;
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course_type WHERE "
+                    + "course_type_id = ?");
+            stmt.setInt(1, course_type_id);
             
-            ResultSetMetaData metaData = rs.getMetaData();
+            rs = stmt.executeQuery();
             
-            //print column headers
-            int numColumns = metaData.getColumnCount();
-            for (int i = 1; i <= numColumns; i++) {
-                row[i-1] = metaData.getColumnName(i);
+            String[] row = new String[6];
+            int numColumns = 0;
+            
+            if(rs != null) {
+                //print results
+                Object obj = null;
+                while (rs.next()) {
+                    found = true;
+                    if(header) {
+                        // get metaData
+                        ResultSetMetaData metaData = rs.getMetaData();
+
+                        // print column headers
+                        numColumns = metaData.getColumnCount();
+                        for (int i = 1; i <= numColumns; i++) {
+                            row[i - 1] = metaData.getColumnName(i);
+                        }
+
+                        printCourseTypeRow(row);
+                        System.out.print("-----------------------------------------------\n");
+                        header = false;
+                    }
+                    for (int i = 1; i <= numColumns; i++) {
+                        obj = rs.getObject(i);
+                        if (obj != null) {
+                            row[i-1] = rs.getObject(i).toString();
+                        }
+                    }
+                    printCourseTypeRow(row);
+                }
+                
+                
             }
             
-            printCourseTypeRow(row);
-            System.out.print("-----------------------------------------------\n");
-            //print results
-            Object obj = null;
-            while (rs.next()) {
+            if(!found) {
+                System.out.println("No course_type with that course_type_id. Please choose from:");
+                viewAllCourseType(rs, stmt, conn);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void viewAllCourseType(ResultSet rs, PreparedStatement stmt, Connection conn) {
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course_type");
+            
+            rs = stmt.executeQuery();
+            
+            String[] row = new String[6];
+            // get metaData
+            if(rs != null) {
+                
+                ResultSetMetaData metaData = rs.getMetaData();
+                
+                //print column headers
+                int numColumns = metaData.getColumnCount();
                 for (int i = 1; i <= numColumns; i++) {
-                    obj = rs.getObject(i);
-                    if (obj != null) {
-                        row[i-1] = rs.getObject(i).toString();
+                    row[i-1] = metaData.getColumnName(i);
+                }
+                
+                printCourseTypeRow(row);
+                System.out.print("-----------------------------------------------\n");
+                //print results
+                Object obj = null;
+                while (rs.next()) {
+                    for (int i = 1; i <= numColumns; i++) {
+                        obj = rs.getObject(i);
+                        if (obj != null) {
+                            row[i-1] = rs.getObject(i).toString();
+                        }
                     }
+                    printCourseTypeRow(row);
                 }
             }
-            
-            printCourseTypeRow(row);
+        } catch( SQLException e) {
+            e.printStackTrace();
         }
+            
     }
     
     private void printCourseTypeRow(String[] row) {
@@ -596,34 +800,41 @@ public class CourseMenu {
         System.out.println("");
     }
     
-    private void deleteCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) 
-            throws SQLException {
+    private void deleteCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
+            Scanner scanner)  {
         System.out.println("Please enter a number for the course_type_id");
         int course_type_id = scanner.nextInt();
         
-        stmt = conn.prepareStatement("DELETE FROM course_type WHERE course_type_id = ?");
-        stmt.setInt(1, course_type_id);
-        
-        stmt.execute();
-
-        checkCourseTypeDelete(rs, stmt, conn, course_type_id);
+        try {
+            stmt = conn.prepareStatement("DELETE FROM course_type WHERE course_type_id = ?");
+            stmt.setInt(1, course_type_id);
+            
+            stmt.execute();
+    
+            checkCourseTypeDelete(rs, stmt, conn, course_type_id);
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void checkCourseTypeDelete(ResultSet rs, PreparedStatement stmt, Connection conn, 
-            int course_type_id) throws SQLException {
-        
-        stmt = conn.prepareStatement("SELECT * FROM course_type WHERE "
-                + "course_type_id = ?");
-        stmt.setInt(1, course_type_id);
-        
-        rs = stmt.executeQuery();
-        
-        if (!rs.next()) {
-            System.out.println("Success");
-        } else {
-            System.out.print("Unable to complete request, please try again");
+            int course_type_id) {
+        try {
+            stmt = conn.prepareStatement("SELECT * FROM course_type WHERE "
+                    + "course_type_id = ?");
+            stmt.setInt(1, course_type_id);
+            
+            rs = stmt.executeQuery();
+            
+            if (!rs.next()) {
+                System.out.println("Success");
+            } else {
+                System.out.print("Unable to complete request, please try again");
+            }
+            System.out.println("");
+        } catch(SQLException e) {
+            e.printStackTrace();
         }
-        System.out.println("");
 
     }
         
