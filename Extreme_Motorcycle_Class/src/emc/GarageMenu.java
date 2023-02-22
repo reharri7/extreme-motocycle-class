@@ -110,7 +110,7 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
 
-        String query = "DELETE FROM bike_type WHERE bike_type_id = ?";
+        String query = "DELETE FROM bike_type WHERE bike_type_id=?";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -140,16 +140,85 @@ public class GarageMenu {
         String newValue = scanner.next();
 
         /* Make a switch case to determine whether to cast the input to another type */
+        String[] validAttributes = {"bike_type_id", "bike_type_value"};
+        boolean validAttribute = false;
+        for (String s : validAttributes) {
+            if (s.equals(attribute)) {
+                validAttribute = true;
+                break;
+            }
+        }
+
+        if (!validAttribute) {
+            System.out.println("Invalid attribute");
+            return;
+        }
+
+        String query = "UPDATE bike_type SET " + attribute + "=? WHERE bike_type_id=?";
+
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, newValue);
+            ps.setInt(2, bikeTypeID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void viewBikeTypes(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bike types registered:");
-
+        String query = "SELECT * FROM bike_type";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void createBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
         String bikeTypeName = scanner.next();
+
+        String query = "INSERT INTO bike_type VALUES (?)";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, bikeTypeName);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void deleteBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -165,10 +234,12 @@ public class GarageMenu {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try {
-                ps.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -182,15 +253,66 @@ public class GarageMenu {
 
         System.out.println("Please enter the new value for the attribute: ");
         String newValue = scanner.next();
+        
+        // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
+        String[] validAttributes = {"problem_id", "problem_date", "bike_id", "repair_date", "description", "cost"};
+        boolean validAttribute = false;
+        for (String s : validAttributes) {
+            if (s.equals(attribute)) {
+                validAttribute = true;
+                break;
+            }
+        }
 
-        /* Make a switch case to determine whether to cast the input to another type */
+        if (!validAttribute) {
+            System.out.println("Invalid attribute");
+            return;
+        }
 
+        String query = "UPDATE problem SET ?=? WHERE bike_id=?";
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, attribute);
+            ps.setString(2, newValue);
+            ps.setInt(3, bikeID);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void viewBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
-
+        String query = "SELECT * FROM problem";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void createBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -223,6 +345,64 @@ public class GarageMenu {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void bikeAssignmentReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+        System.out.println("Please enter a number for the bikes ID: ");
+        int bikeID = scanner.nextInt();
+
+        String query = "SELECT course_schedule.course_date,course.course_name "
+            + "FROM bike_assignment,course_schedule,course "
+            + "WHERE bike_assignment.course_schedule_id=course_schedule.course_schedule_id "
+            + "AND course_schedule.course_id=course.course_id "
+            + "AND bike_assignment.bike_id=?";
+
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, bikeID);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    private void bikeProblemReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+        System.out.println("Please enter a number for the bike's ID: ");
+        int bikeID = scanner.nextInt();
+
+        String query = "SELECT problem_date,repair_date,description,cost FROM problem WHERE bike_id=?";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, bikeID);
+            rs = ps.executeQuery();
+            Utils.printSet(rs);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
             try {
                 if (ps != null) {
                     ps.close();
@@ -233,17 +413,6 @@ public class GarageMenu {
         }
     }
 
-    private void bikeAssignmentReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        System.out.println("Please enter a number for the bikes ID: ");
-        int bikeID = scanner.nextInt();
-
-    }
-
-    private void bikeProblemReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
-
-    }
 
     private void unassignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike assignment ID: ");
@@ -304,12 +473,31 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike's ID you wish to delete: ");
         int bikeID = scanner.nextInt();
 
-        String query = "DELETE FROM bike WHERE bikeID = ?";
+        // Delete from bike
+        String query = "DELETE FROM bike WHERE bike_id=?";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
             System.out.println("Sucessfully deleted bike: " + bikeID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // Delete any references to the bike in bike_assignment
+        query = "DELETE FROM bike_assignment WHERE bike_id=?";
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, bikeID);
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -334,12 +522,46 @@ public class GarageMenu {
         String newValue = scanner.next();
 
         /* Make a switch case to determine whether to cast the input to another type */
+        String[] validAttributes = {"bike_id", "brand", "type", "license_plate", "vin", "cc", "broken"};
+        boolean validAttribute = false;
+        for (String s : validAttributes) {
+            if (s.equals(attribute)) {
+                validAttribute = true;
+            }
+        }
 
+        if (!validAttribute) {
+            System.out.println("Invalid attribute");
+            return;
+        }
+
+        String query = "UPDATE bike SET " + attribute + "=? WHERE bike_id=?";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, newValue);
+            ps.setInt(2, bikeID);
+            ps.executeUpdate();
+            System.out.println("Sucessfully updated bike " + bikeID + " with new value " + newValue);
+        } 
+        catch (SQLException e) {
+            System.out.println("We were unable to update the bike. Are you sure the bike exists?");
+            e.printStackTrace();
+        }
+        finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bikes registered: ");
-        String query = "SELECT * FROM bike";
+        String query = "SELECT bike_id, brand, cc, broken FROM bike";
         try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
@@ -348,14 +570,7 @@ public class GarageMenu {
         }
 
         // Print the resultset
-        try {
-            while (rs.next()) {
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        Utils.printSet(rs);
     }
 
     private void createBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
