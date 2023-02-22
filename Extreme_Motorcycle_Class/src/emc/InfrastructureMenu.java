@@ -17,20 +17,27 @@ public class InfrastructureMenu {
     private static final String DELETE_BIKE_RANGE_BY_ID = "DELETE bike_range WHERE range_id = ?";
     private static final String INSERT_RANGE_ASSIGNMENT = "insert into range_assignment (range_id, course_schedule_id) values (?, ?)";
     private static final String SELECT_ALL_COURSE = "SELECT * FROM course";
+    private static final String SELECT_RANGE_AVAILABILITY_BY_WEEK = "SELECT ra.range_id " +
+            " from course_schedule cs" +
+            " left join range_assignment ra on cs.course_schedule_id = ra.course_schedule_id " +
+            " where ra.range_id = ? " +
+            " and cs.course_date = ? " +
+            " and cs.time_type_id = ?";
     private static final String SELECT_COURSE_SCHEDULE_BY_WEEK_WITHOUT_RANGE_ASSIGNMENT =
             "SELECT cs.course_schedule_id, " +
                     " cs.course_date, " +
                     " course.course_name, " +
-                    " ct.course_type_value " +
+                    " ct.course_type_value, " +
+                    " tt.time_type_value " +
                     " FROM course " +
                     " left join course_schedule cs on course.course_id = cs.course_id " +
                     " left join course_type ct on course.course_type = ct.course_type_id " +
+                    " left join time_type tt on cs.time_type_id = tt.time_type_id " +
                     " WHERE course.course_id = cs.course_id " +
                     " and cs.course_schedule_id not in (select distinct ra.course_schedule_id from range_assignment ra)" +
                     " AND cs.course_date >= ? " +
                     " AND cs.course_date < ? " +
                     " ORDER BY cs.course_date";
-    // TODO: Add time type
     private static final String SELECT_AVAILABLE_RANGE_BY_COURSE_SCHEDULE_ID = "" +
             "select bike_range.range_id, " +
             "rt.range_type_value, " +
@@ -44,6 +51,13 @@ public class InfrastructureMenu {
             "or (select distinct ra.range_id from course_schedule " +
             "left join range_assignment ra on course_schedule.course_schedule_id = ra.course_schedule_id " +
             "where course_schedule.course_schedule_id = ?) is null";
+    private static final String SELECT_AVAILABLE_RANGES_BY_DATE_AND_TIME = "select range_id " +
+            "from bike_range " +
+            "where bike_range.range_id not in (select ra.range_id " +
+            "from range_assignment ra " +
+            "left join course_schedule cs on ra.course_schedule_id = cs.course_schedule_id " +
+            "where cs.course_date = ? and cs.time_type_id = ?) " +
+            "order by range_id";
     /**
      * Print student menu options and call appropriate method.
      * @param resultSet
@@ -255,8 +269,106 @@ public class InfrastructureMenu {
                                    Connection connection,
                                    Scanner scanner
     ) {
-        throw new RuntimeException("Not implemented yet.");
+        int viewRangeScheduleSelection;
+
+        while(true) {
+            printViewRangeScheduleSubMenu();
+            try {
+                viewRangeScheduleSelection = scanner.nextInt();
+                switch (viewRangeScheduleSelection) {
+                    case 0 -> {
+                        return;
+                    }
+                    case 1 -> viewWeeklyScheduleOfRange(connection, scanner);
+                    case 2 -> viewRangeAvailability(connection, scanner);
+
+                    default -> System.out.println("Invalid selection. Please try again.");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid selection. Please try again.");
+                scanner.nextLine();
+            }
+        }
     }
+
+    private void viewRangeAvailability(Connection connection, Scanner scanner) {
+        System.out.println("Enter year for which would like to view range availability: ");
+        int year = scanner.nextInt();
+        System.out.println("Enter month for which would like to view range availability: ");
+        int month = scanner.nextInt();
+        System.out.println("Enter day for which would like to view range availability: ");
+        int day = scanner.nextInt();
+        LocalDate date;
+        System.out.println("Would you like to view availability for morning or afternoon?");
+        System.out.println("1. Morning");
+        System.out.println("2. Afternoon");
+        int timeOfDay = scanner.nextInt();
+        if(timeOfDay != 1 && timeOfDay != 2) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        try {
+            date = Utils.createLocalDate(year, month, day);
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_AVAILABLE_RANGES_BY_DATE_AND_TIME);
+            preparedStatement.setDate(1, Date.valueOf(date));
+            preparedStatement.setInt(2, timeOfDay);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            Utils.printSet(resultSet);
+        } catch (DateTimeException dateTimeException) {
+            System.out.println("Invalid date entered.");
+            return;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void viewWeeklyScheduleOfRange(Connection connection, Scanner scanner) {
+        viewRanges(connection);
+        System.out.println("Which range would you like to view the schedule for?");
+        System.out.println("Enter range ID: ");
+        int rangeId = scanner.nextInt();
+        System.out.println("Enter year for which would like to view range schedule: ");
+        int year = scanner.nextInt();
+        System.out.println("Enter month for which would like to view range schedule: ");
+        int month = scanner.nextInt();
+        System.out.println("Enter day for which would like to view range schedule: ");
+        int day = scanner.nextInt();
+        LocalDate date;
+        try {
+            date = Utils.createLocalDate(year, month, day);
+        } catch (DateTimeException dateTimeException) {
+            System.out.println("Invalid date entered.");
+            return;
+        }
+        System.out.println("Available times for range " + rangeId + " for week of " + date + ":");
+        for(int i = 0; i < 7; i++) {
+            LocalDate currentDate = date.plusDays(i);
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_RANGE_AVAILABILITY_BY_WEEK);
+                preparedStatement.setInt(1, rangeId);
+                preparedStatement.setDate(2, Date.valueOf(currentDate));
+                preparedStatement.setInt(3, 1);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if(resultSet.next()) {
+                    continue;
+                }
+                System.out.println(currentDate + " AM");
+                preparedStatement = connection.prepareStatement(SELECT_RANGE_AVAILABILITY_BY_WEEK);
+                preparedStatement.setInt(1, rangeId);
+                preparedStatement.setDate(2, Date.valueOf(currentDate));
+                preparedStatement.setInt(3, 2);
+                resultSet = preparedStatement.executeQuery();
+                if(resultSet.next()) {
+                    continue;
+                }
+                    System.out.println(currentDate + " PM");
+            } catch (SQLException e) {
+                System.out.println("Error during range schedule retrieval.");
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void assignRange(Connection connection, Scanner scanner) {
         System.out.println("Enter year for which would like to view course schedule: ");
         int year = scanner.nextInt();
@@ -493,5 +605,12 @@ public class InfrastructureMenu {
         System.out.println("1. Manage Ranges");
         System.out.println("2. Manage Classrooms");
         System.out.println("0. Main Menu");
+    }
+
+    private void printViewRangeScheduleSubMenu() {
+        System.out.println("View Range Sub Menu");
+        System.out.println("1. Weekly Schedule of Ranges");
+        System.out.println("2. View Available Ranges");
+        System.out.println("0. Manage Ranges Menu");
     }
 }
