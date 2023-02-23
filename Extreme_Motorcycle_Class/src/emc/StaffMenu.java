@@ -57,3 +57,37 @@ public class StaffMenu {
         }
 
     }
+
+    private void viewCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+        System.out.println(": ");
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT coach.coach_id,person.full_name\n" +
+                    "FROM coach,person \n" +
+                    "WHERE coach.person_id=person.person_id;\n");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Utils.printSet(rs);
+    }
+
+    private void viewCoachSchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    }
+
+    private void unassignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    }
+
+    private void assignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    }
+
+    private void deleteCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    }
+
+    private void editCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    }
+
+    private void createCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    }
+
+}
