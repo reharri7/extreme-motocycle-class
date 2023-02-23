@@ -87,8 +87,8 @@ public class GarageMenu {
                 }
 
             } catch (InputMismatchException ex) {
-                System.out.println("Please enter an integer value between 0 and (TODO:)");
-                scanner.next();
+                System.out.println("Please ensure you entered valid input. Try again.");
+                scanner.nextLine();
             }
         }
     }
@@ -713,7 +713,7 @@ public class GarageMenu {
         int cc = scanner.nextInt();
 
         // Build the query and use PreparedStatements to insert the data
-        String query = "INSERT INTO bike (brand, bike_type, license_plate, vin, broken, cc) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO bike (brand, type, license_plate, vin, broken, cc) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
