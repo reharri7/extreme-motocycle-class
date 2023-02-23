@@ -57,6 +57,18 @@ public class StaffMenu {
         }
 
     }
+    
+        private void printStaffMenu() {
+        System.out.println("Coach Menu");
+        System.out.println("1. Create Coach");
+        System.out.println("2. View Coach");
+        System.out.println("3. Edit Coach");
+        System.out.println("4. Delete Coach");
+        System.out.println("5. Assign Coach");
+        System.out.println("6. Unassign Coach");
+        System.out.println("7. View Coach Schedule");
+        System.out.println("0. Main Menu");
+    }
 
     private void viewCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println(": ");
