@@ -1,5 +1,9 @@
 package emc;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * GarageMenu.java
  *
@@ -18,6 +22,14 @@ import java.util.Scanner;
 
 public class GarageMenu {
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     * @throws SQLException
+     */
     public void menu(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
         int selection;
 
@@ -79,7 +91,7 @@ public class GarageMenu {
                 }
 
             } catch (InputMismatchException ex) {
-                System.out.println("Please enter an integer value between 0 and (TODO:)");
+                System.out.println("Please enter an integer value between 0 and 16" );
                 scanner.next();
             }
         }
@@ -106,6 +118,13 @@ public class GarageMenu {
         System.out.println("0. Main Menu");
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
@@ -129,6 +148,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
@@ -175,6 +201,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewBikeTypes(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bike types registered:");
         String query = "SELECT * FROM bike_type";
@@ -198,11 +231,18 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
         String bikeTypeName = scanner.next();
 
-        String query = "INSERT INTO bike_type VALUES (?)";
+        String query = "INSERT INTO bike_type (bike_type_value) VALUES (?)";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -221,11 +261,18 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the problem ID: ");
         int problemID = scanner.nextInt();
 
-        String query = "DELETE FROM bike_problem WHERE problem_id = ?";
+        String query = "DELETE FROM problem WHERE problem_id=?";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -244,6 +291,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -252,7 +306,13 @@ public class GarageMenu {
         String attribute = scanner.next();
 
         System.out.println("Please enter the new value for the attribute: ");
-        String newValue = scanner.next();
+        String newValue = "";
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            newValue = br.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
         String[] validAttributes = {"problem_id", "problem_date", "bike_id", "repair_date", "description", "cost"};
@@ -269,14 +329,13 @@ public class GarageMenu {
             return;
         }
 
-        String query = "UPDATE problem SET ?=? WHERE bike_id=?";
+        String query = "UPDATE problem SET " + attribute + "=? WHERE bike_id=?";
         PreparedStatement ps = null;
 
         try {
             ps = conn.prepareStatement(query);
-            ps.setString(1, attribute);
-            ps.setString(2, newValue);
-            ps.setInt(3, bikeID);
+            ps.setString(1, newValue);
+            ps.setInt(2, bikeID);
             ps.executeUpdate();
         }
         catch (SQLException e) {
@@ -293,6 +352,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         String query = "SELECT * FROM problem";
         PreparedStatement ps = null;
@@ -315,23 +381,37 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
-        System.out.println("Please enter a date the problem occured: ");
+        System.out.println("Please enter a date the problem occured (yyyy-mm-dd): ");
         String date = scanner.next();
 
         System.out.println("Please enter a description of the problem between 1 and 150 characters: ");
-        String description = scanner.next();
+        String description = "";
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            description = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        System.out.println("Please enter a date to specify the repair date: ");
+        System.out.println("Please enter a date to specify the repair date (yyyy-mm-dd): ");
         String repairDate = scanner.next();
 
         System.out.println("Please enter a number for the cost of repair: ");
         int cost = scanner.nextInt();
 
-        String query = "INSERT INTO bike_problem (problem_date, bike_id, repair_date, description, cost) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO problem (problem_date, bike_id, repair_date, description, cost) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -355,6 +435,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void bikeAssignmentReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bikes ID: ");
         int bikeID = scanner.nextInt();
@@ -387,6 +474,13 @@ public class GarageMenu {
 
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void bikeProblemReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -414,6 +508,13 @@ public class GarageMenu {
     }
 
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void unassignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike assignment ID: ");
         int bikeAssignmentID = scanner.nextInt();
@@ -424,7 +525,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeAssignmentID);
             ps.executeUpdate();
-            System.out.println("Sucessfully unassigned bike " + bikeAssignmentID);
+            System.out.println("Sucessfully unassigned the bike assignment: " + bikeAssignmentID);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -439,6 +540,13 @@ public class GarageMenu {
 
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void assignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
@@ -469,6 +577,13 @@ public class GarageMenu {
 
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to delete: ");
         int bikeID = scanner.nextInt();
@@ -479,6 +594,7 @@ public class GarageMenu {
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
+            ps.executeUpdate();
             System.out.println("Sucessfully deleted bike: " + bikeID);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -511,6 +627,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to edit: ");
         int bikeID = scanner.nextInt();
@@ -559,6 +682,13 @@ public class GarageMenu {
         }
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bikes registered: ");
         String query = "SELECT bike_id, brand, cc, broken FROM bike";
@@ -573,6 +703,13 @@ public class GarageMenu {
         Utils.printSet(rs);
     }
 
+    
+    /** 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println("Enter the bike's brand between 1-30 characters: ");
         String brand = scanner.next();
@@ -593,7 +730,7 @@ public class GarageMenu {
         int cc = scanner.nextInt();
 
         // Build the query and use PreparedStatements to insert the data
-        String query = "INSERT INTO bike (brand, bike_type, license_plate, vin, broken, cc) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO bike (brand, type, license_plate, vin, broken, cc) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
