@@ -91,8 +91,8 @@ public class GarageMenu {
                 }
 
             } catch (InputMismatchException ex) {
-                System.out.println("Please ensure you entered valid input. Try again.");
-                scanner.nextLine();
+                System.out.println("Please enter an integer value between 0 and 16" );
+                scanner.next();
             }
         }
     }
