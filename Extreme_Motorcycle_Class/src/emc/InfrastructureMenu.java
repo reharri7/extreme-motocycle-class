@@ -114,10 +114,10 @@ public class InfrastructureMenu {
                         viewRanges(connection);
                     }
                     case 4 -> {
-                        deleteRange(preparedStatement, connection, scanner);
+                        deleteRange(resultSet, preparedStatement, connection, scanner);
                         viewRanges(connection);
                     }
-                    case 5 -> assignRange(connection, scanner);
+                    case 5 -> assignRange(resultSet, preparedStatement, connection, scanner);
                     case 6 -> unassignRange(resultSet, preparedStatement, connection, scanner);
                     case 7 -> viewRangeSchedule(resultSet, preparedStatement, connection, scanner);
                     case 8 -> createRangeType(resultSet, preparedStatement, connection, scanner);
@@ -236,10 +236,12 @@ public class InfrastructureMenu {
         }
 
     }
-    private void deleteRange(PreparedStatement preparedStatement,
+    private void deleteRange(ResultSet resultSet,
+                             PreparedStatement preparedStatement,
                              Connection connection,
                              Scanner scanner
     ) {
+        throw new RuntimeException("Not implemented yet.");
         viewRanges(connection);
         System.out.println("Enter range ID to delete: ");
         int rangeId = scanner.nextInt();
@@ -476,7 +478,24 @@ public class InfrastructureMenu {
                                  Connection connection,
                                  Scanner scanner
     ) {
-        throw new RuntimeException("Not implemented yet.");
+        String rangeType;
+        System.out.println("Enter range type: ");
+        rangeType = scanner.next();
+        try {
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement("INSERT INTO range_type (range_type_value) VALUES (?)");
+            preparedStatement.setString(1, rangeType);
+            int createRangeTypeResult = preparedStatement.executeUpdate();
+            if(createRangeTypeResult == 1) {
+                System.out.println("Range type created successfully.");
+                connection.commit();
+            } else {
+                System.out.println("Range type creation failed.");
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error during range type creation.");
+        }
     }
 
     private void viewRangeTypes(Connection connection) {
@@ -513,6 +532,10 @@ public class InfrastructureMenu {
         boolean rangeExists = false;
         try {
             preparedStatement = connection.prepareStatement(SELECT_FROM_BIKE_RANGE_BY_ID);
+        } catch (SQLException e) {
+            System.out.println("Error during range retrieval.");
+        }
+        try {
             preparedStatement.setInt(1, rangeId);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()) {
@@ -569,14 +592,60 @@ public class InfrastructureMenu {
                                Connection connection,
                                Scanner scanner
     ) {
-        throw new RuntimeException("Not implemented yet.");
+        viewRangeTypes(connection);
+        System.out.println("Enter range type ID to edit: ");
+        int rangeTypeId = scanner.nextInt();
+        if(!rangeTypeExists(preparedStatement, connection, rangeTypeId)) {
+            System.out.println("Range type does not exist.");
+            return;
+        }
+        String rangeType;
+        System.out.println("Enter new range type: ");
+        rangeType = scanner.next();
+        try {
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement("UPDATE range_type SET range_type_value = ? WHERE range_type_id = ?");
+            preparedStatement.setString(1, rangeType);
+            preparedStatement.setInt(2, rangeTypeId);
+            int editRangeTypeResult = preparedStatement.executeUpdate();
+            if(editRangeTypeResult == 1) {
+                System.out.println("Range type edited successfully.");
+                connection.commit();
+            } else {
+                System.out.println("Range type edit failed.");
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error during range type edit.");
+        }
     }
     private void deleteRangeType(ResultSet resultSet,
                                  PreparedStatement preparedStatement,
                                  Connection connection,
                                  Scanner scanner
     ) {
-        throw new RuntimeException("Not implemented yet.");
+        viewRangeTypes(connection);
+        System.out.println("Enter range type ID to delete: ");
+        int rangeTypeId = scanner.nextInt();
+        if(!rangeTypeExists(preparedStatement, connection, rangeTypeId)) {
+            System.out.println("Range type does not exist.");
+            return;
+        }
+        try {
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement("DELETE FROM range_type WHERE range_type_id = ?");
+            preparedStatement.setInt(1, rangeTypeId);
+            int deleteRangeTypeResult = preparedStatement.executeUpdate();
+            if(deleteRangeTypeResult == 1) {
+                System.out.println("Range type deleted successfully.");
+                connection.commit();
+            } else {
+                System.out.println("Range type deletion failed.");
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error during range type deletion.");
+        }
     }
     private void printRangeMenu() {
         System.out.println("Range Menu");
