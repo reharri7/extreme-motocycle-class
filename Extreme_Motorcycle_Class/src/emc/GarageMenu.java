@@ -1,5 +1,9 @@
 package emc;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * GarageMenu.java
  *
@@ -238,7 +242,7 @@ public class GarageMenu {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
         String bikeTypeName = scanner.next();
 
-        String query = "INSERT INTO bike_type VALUES (?)";
+        String query = "INSERT INTO bike_type (bike_type_value) VALUES (?)";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -268,7 +272,7 @@ public class GarageMenu {
         System.out.println("Please enter a number for the problem ID: ");
         int problemID = scanner.nextInt();
 
-        String query = "DELETE FROM bike_problem WHERE problem_id = ?";
+        String query = "DELETE FROM problem WHERE problem_id=?";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
@@ -302,7 +306,13 @@ public class GarageMenu {
         String attribute = scanner.next();
 
         System.out.println("Please enter the new value for the attribute: ");
-        String newValue = scanner.next();
+        String newValue = "";
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            newValue = br.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
         String[] validAttributes = {"problem_id", "problem_date", "bike_id", "repair_date", "description", "cost"};
@@ -319,14 +329,13 @@ public class GarageMenu {
             return;
         }
 
-        String query = "UPDATE problem SET ?=? WHERE bike_id=?";
+        String query = "UPDATE problem SET " + attribute + "=? WHERE bike_id=?";
         PreparedStatement ps = null;
 
         try {
             ps = conn.prepareStatement(query);
-            ps.setString(1, attribute);
-            ps.setString(2, newValue);
-            ps.setInt(3, bikeID);
+            ps.setString(1, newValue);
+            ps.setInt(2, bikeID);
             ps.executeUpdate();
         }
         catch (SQLException e) {
@@ -383,13 +392,20 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
-        System.out.println("Please enter a date the problem occured: ");
+        System.out.println("Please enter a date the problem occured (yyyy-mm-dd): ");
         String date = scanner.next();
 
         System.out.println("Please enter a description of the problem between 1 and 150 characters: ");
-        String description = scanner.nextLine();
+        String description = "";
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            description = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        System.out.println("Please enter a date to specify the repair date: ");
+        System.out.println("Please enter a date to specify the repair date (yyyy-mm-dd): ");
         String repairDate = scanner.next();
 
         System.out.println("Please enter a number for the cost of repair: ");
