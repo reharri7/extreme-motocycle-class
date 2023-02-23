@@ -509,7 +509,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeAssignmentID);
             ps.executeUpdate();
-            System.out.println("Sucessfully unassigned bike " + bikeAssignmentID);
+            System.out.println("Sucessfully unassigned the bike assignment: " + bikeAssignmentID);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -578,6 +578,7 @@ public class GarageMenu {
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
+            ps.executeUpdate();
             System.out.println("Sucessfully deleted bike: " + bikeID);
         } catch (SQLException e) {
             e.printStackTrace();
