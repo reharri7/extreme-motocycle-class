@@ -387,7 +387,7 @@ public class GarageMenu {
         String date = scanner.next();
 
         System.out.println("Please enter a description of the problem between 1 and 150 characters: ");
-        String description = scanner.next();
+        String description = scanner.nextLine();
 
         System.out.println("Please enter a date to specify the repair date: ");
         String repairDate = scanner.next();
@@ -395,7 +395,7 @@ public class GarageMenu {
         System.out.println("Please enter a number for the cost of repair: ");
         int cost = scanner.nextInt();
 
-        String query = "INSERT INTO bike_problem (problem_date, bike_id, repair_date, description, cost) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO problem (problem_date, bike_id, repair_date, description, cost) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
