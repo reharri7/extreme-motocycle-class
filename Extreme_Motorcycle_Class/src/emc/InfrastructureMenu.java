@@ -117,7 +117,7 @@ public class InfrastructureMenu {
                         deleteRange(resultSet, preparedStatement, connection, scanner);
                         viewRanges(connection);
                     }
-                    case 5 -> assignRange(resultSet, preparedStatement, connection, scanner);
+                    case 5 -> assignRange(connection, scanner);
                     case 6 -> unassignRange(resultSet, preparedStatement, connection, scanner);
                     case 7 -> viewRangeSchedule(resultSet, preparedStatement, connection, scanner);
                     case 8 -> createRangeType(resultSet, preparedStatement, connection, scanner);
@@ -241,7 +241,6 @@ public class InfrastructureMenu {
                              Connection connection,
                              Scanner scanner
     ) {
-        throw new RuntimeException("Not implemented yet.");
         viewRanges(connection);
         System.out.println("Enter range ID to delete: ");
         int rangeId = scanner.nextInt();
