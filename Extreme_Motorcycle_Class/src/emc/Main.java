@@ -8,14 +8,9 @@ package emc;
  * Group 4
  */
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.sql.PreparedStatement;
 
 public class Main {
     public static void main(String[] args) {
@@ -58,8 +53,8 @@ public class Main {
                     try {
                         selection = scanner.nextInt();
                         switch (selection){
-                        case 1: courseMenu.menu(rs, ps, conn, scanner); break;
-                        case 2: studentMenu.menu(rs, ps, conn, scanner); break;
+                        case 1: courseMenu.menu(rs, stmt, conn, scanner); break;
+                        case 2: studentMenu.menu(rs, ps, conn); break;
                         case 3: garageMenu.menu(rs, stmt, conn, scanner); break;
                         case 4: staffMenu.menu(rs, stmt, conn, scanner); break;
                         case 5: infMenu.menu(rs, ps, conn, scanner); break;
