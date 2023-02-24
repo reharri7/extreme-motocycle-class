@@ -8,8 +8,22 @@ import java.sql.PreparedStatement;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+/**
+ * This is the courseMenu class
+ * 
+ * @author Maura
+ *
+ */
 public class CourseMenu {
 
+    /**
+     * Holds the menu then lets user select options
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     public void menu(ResultSet rs, PreparedStatement stmt, Connection conn, Scanner scanner) {
         int selection;
         
@@ -39,7 +53,15 @@ public class CourseMenu {
     }
     
 
-
+    /**
+     * This method asks the user for the course attributes, then sends the create statement to the
+     * database.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         
@@ -76,6 +98,15 @@ public class CourseMenu {
             
     }
     
+    /**
+     * This method prints human readable error statements from the create course method.
+     * 
+     * @param e
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void printCreateCourseError(String e, ResultSet rs, PreparedStatement stmt, 
             Connection conn, Scanner scanner) {
         System.out.println(e);
@@ -92,7 +123,18 @@ public class CourseMenu {
         }
     }
     
-
+    /**
+     * This method checks if the course was added to the database.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param course_name
+     * @param course_type
+     * @param capacity
+     * @param description
+     * @param cost
+     */
     private void checkCourse(ResultSet rs, PreparedStatement stmt, Connection conn,  
             String course_name, int course_type, int capacity, String description, int cost) {
         try {
@@ -127,6 +169,15 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This course gets the course id, attribue name and new attribute, then sends an edit statement
+     * to the database.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         System.out.println("Please enter a number for the course id");
@@ -174,6 +225,13 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method prints the row
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     */
     private void printCourseColumn(ResultSet rs, PreparedStatement stmt, Connection conn) {
         try {
             stmt = conn.prepareStatement("SELECT * FROM course");
@@ -202,6 +260,16 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method checks that the edit course was successful
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param course_id
+     * @param attribute_name
+     * @param new_value
+     */
     private void checkCourseAttribute(ResultSet rs, PreparedStatement stmt, Connection conn,
             int course_id, String attribute_name, String new_value ) {
         boolean found = false;
@@ -230,6 +298,14 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method asks the user for a course id and gets the course from the database and prints it
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         System.out.println("Please enter a number for the course id");
@@ -268,48 +344,55 @@ public class CourseMenu {
                     viewAllCourses(rs, stmt, conn);
                     return;
                 }
-                
-               
             }
         } catch(SQLException e) {
             e.printStackTrace();
         }
     }
     
+    /**
+     * This method gets all courses from the database and prints all of them.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     */
     private void viewAllCourses(ResultSet rs, PreparedStatement stmt, Connection conn) {
         try {
-        stmt = conn.prepareStatement("SELECT * FROM course");
-        
-        rs = stmt.executeQuery();
-        
-        String[] row = new String[6];
-        // get metaData
-        if(rs != null) {
+            stmt = conn.prepareStatement("SELECT * FROM course");
             
-            ResultSetMetaData metaData = rs.getMetaData();
+            rs = stmt.executeQuery();
             
-            //print column headers
-            int numColumns = metaData.getColumnCount();
-            printCourseColumn(rs, stmt, conn);
-            //print results
-            Object obj = null;
-            while (rs.next()) {
-                for (int i = 1; i <= numColumns; i++) {
-                    obj = rs.getObject(i);
-                    if (obj != null) {
-                        row[i-1] = rs.getObject(i).toString();
+            String[] row = new String[6];
+            // get metaData
+            if(rs != null) {
+                
+                ResultSetMetaData metaData = rs.getMetaData();
+                
+                //print column headers
+                int numColumns = metaData.getColumnCount();
+                printCourseColumn(rs, stmt, conn);
+                //print results
+                Object obj = null;
+                while (rs.next()) {
+                    for (int i = 1; i <= numColumns; i++) {
+                        obj = rs.getObject(i);
+                        if (obj != null) {
+                            row[i-1] = rs.getObject(i).toString();
+                        }
                     }
+                    printCourseRow(row);
                 }
-                printCourseRow(row);
             }
-            
-            
-        }
         } catch (SQLException e){
             e.printStackTrace();
         }
     }
     
+    /**
+     * prints row
+     * @param row
+     */
     private void printCourseRow(String[] row) {
         System.out.printf("|%-9s|%-30s|%-11s|%-8s|%-100s|%5s|", 
                 row[0], 
@@ -321,6 +404,14 @@ public class CourseMenu {
         System.out.println("");
     }
         
+    /**
+     * This method gets a course id from the user and sends a delete statement to the database
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteCourse(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         
@@ -339,7 +430,13 @@ public class CourseMenu {
         }
     }
     
-        
+    /**
+     * This method checks that the course was successfully deleted.
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param course_id
+     */
     private void checkCourseDelete(ResultSet rs, PreparedStatement stmt, Connection conn, 
             int course_id)  {
         try {
@@ -360,6 +457,15 @@ public class CourseMenu {
         
     }
 
+    /**
+     * This method asks the user for a course id and prints the course report with all students
+     * and whether they have paid or not.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void courseReport(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         boolean found = false;
@@ -414,6 +520,15 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method asks the user for a year a month and a day then prints the list of all courses
+     * from this day to a week from this day
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void weeklyCourseReport(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         boolean correctInput = false;
@@ -477,6 +592,15 @@ public class CourseMenu {
         executeCourseSchedule(rs, stmt, conn, thisWeek, weekLater);
     }
     
+    /**
+     * This method is a helper method for weeklyCourseReport and prepares and sends the statement
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param thisWeek
+     * @param weekLater
+     */
     private void executeCourseSchedule(ResultSet rs, PreparedStatement stmt, Connection conn, 
             String thisWeek, String weekLater) {
         try {
@@ -563,6 +687,14 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method is a helper method that converts the day year and month into a string
+     * 
+     * @param year
+     * @param month
+     * @param day
+     * @return
+     */
     private String convertDateToString(int year, int month, int day) {
         String date = Integer.toString(year)+ "-";
         if(month < 10) {
@@ -579,6 +711,14 @@ public class CourseMenu {
         return date;
     }
     
+    /**
+     * This method calculates the date one week after a given year month and day
+     * 
+     * @param year
+     * @param month
+     * @param day
+     * @return
+     */
     private String calculateWeekLater(int year, int month, int day) {
         int newDay = day + 7;
         int newMonth = month;
@@ -601,6 +741,15 @@ public class CourseMenu {
         
     }
     
+    /**
+     * This method asks user for a course type value and then creates the course type in the 
+     * database
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void createCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         System.out.println("Please enter a course type value between 1-30 characters");
@@ -623,6 +772,14 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method checks that the course type was successfully created.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param course_type_value
+     */
     private void checkCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
             String course_type_value) {
         try {
@@ -646,6 +803,15 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method asks the user for a course type id and a coure type value then updates that 
+     * course type with the new course type value
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void editCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         try {
@@ -669,6 +835,15 @@ public class CourseMenu {
         
     }
     
+    /**
+     * This method checks that the course type was successfully edited.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param course_type_id
+     * @param new_value
+     */
     private void checkCourseTypeAttribute(ResultSet rs, PreparedStatement stmt, Connection conn, 
             int course_type_id, String new_value ) {
         boolean found = false;
@@ -699,6 +874,14 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * this method asks the user for a course type id and then prints out that course type.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void viewCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner) {
         System.out.println("Please enter a number for the course_type_id");
@@ -755,6 +938,13 @@ public class CourseMenu {
         }
     }
     
+    /**
+     * This method prints out all course types
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     */
     private void viewAllCourseType(ResultSet rs, PreparedStatement stmt, Connection conn) {
         try {
             stmt = conn.prepareStatement("SELECT * FROM course_type");
@@ -793,6 +983,11 @@ public class CourseMenu {
             
     }
     
+    /**
+     * print row
+     * 
+     * @param row
+     */
     private void printCourseTypeRow(String[] row) {
         System.out.printf("|%-14s|%-30s|", 
                 row[0], 
@@ -800,6 +995,13 @@ public class CourseMenu {
         System.out.println("");
     }
     
+    /**
+     * Asks the user for a course type id and deletes that course type from the database.
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param scanner
+     */
     private void deleteCourseType(ResultSet rs, PreparedStatement stmt, Connection conn, 
             Scanner scanner)  {
         System.out.println("Please enter a number for the course_type_id");
@@ -817,6 +1019,14 @@ public class CourseMenu {
         }
     }
 
+    /**
+     * Checks that the course type was deleted.
+     * 
+     * @param rs
+     * @param stmt
+     * @param conn
+     * @param course_type_id
+     */
     private void checkCourseTypeDelete(ResultSet rs, PreparedStatement stmt, Connection conn, 
             int course_type_id) {
         try {
@@ -838,7 +1048,9 @@ public class CourseMenu {
 
     }
         
-
+    /**
+     * prints the CourseMenu
+     */
     private void printMenu() {
         System.out.println("Course Menu");
         System.out.println("1. Create Course");
