@@ -142,7 +142,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -195,7 +195,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -225,7 +225,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -255,7 +255,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -285,7 +285,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -311,7 +311,8 @@ public class GarageMenu {
         try {
             newValue = br.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to read input.");
+            return;
         }
         
         // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
@@ -346,7 +347,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -375,7 +376,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -402,7 +403,7 @@ public class GarageMenu {
         try {
             description = reader.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to close prepared statement, leaking resources.");
         }
 
         System.out.println("Please enter a date to specify the repair date (yyyy-mm-dd): ");
@@ -432,7 +433,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -470,7 +471,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -505,7 +506,7 @@ public class GarageMenu {
                     ps.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.out.println("Failed to close prepared statement, leaking resources.");
             }
         }
     }
@@ -536,7 +537,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -573,7 +574,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -606,7 +607,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -624,7 +625,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -672,14 +673,13 @@ public class GarageMenu {
         } 
         catch (SQLException e) {
             System.out.println("We were unable to update the bike. Are you sure the bike exists?");
-            e.printStackTrace();
         }
         finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -752,7 +752,7 @@ public class GarageMenu {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
