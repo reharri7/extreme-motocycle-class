@@ -9,11 +9,12 @@ package emc;
  */
 
 import java.sql.*;
+import java.time.DateTimeException;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.time.LocalDate;
 
-import static emc.Utils.createLocalDate;
+import static emc.Utils.createBirthday;
 import static emc.Utils.printSet;
 
 
@@ -21,47 +22,48 @@ public class StudentMenu {
 
     private static final String CREATE_PERSON = "INSERT INTO person (full_name, address, date_birth, phone) VALUES (?, ?, ?, ?)";
     private static final String SELECT_PERSON_BY_ID = "SELECT person_id FROM person WHERE full_name=? AND address=? AND date_birth=? AND phone=?";
-    private static final String CREATE_STUDENT = "INSERT INTO student (personId) VALUES (?)";
-    private static final String VIEW_STUDENTS = "SELECT student.student_id,person.full_name FROM student,person";
+    private static final String CREATE_STUDENT = "INSERT INTO student (person_id) VALUES (?)";
+    private static final String VIEW_STUDENTS = "SELECT DISTINCT student.student_id,person.full_name FROM student,person WHERE student.person_id=person.person_id ORDER BY student_id";
     private static final String SELECT_STUDENT = "SELECT person_id FROM student WHERE student_id=?";
     private static final String DELETE_PERSON = "DELETE FROM person WHERE person_id=?";
     private static final String DELETE_COURSE_ENROLLMENT = "DELETE FROM course_enrollment WHERE student_id=?";
     private static final String DELETE_STUDENT = "DELETE FROM student WHERE student_id=?";
     private static final String STUDENT_REPORT = "SELECT course_enrollment.course_id, course.course_name, course_enrollment.paid FROM course_enrollment,course WHERE course_enrollment.course_id=course.course_id AND course_enrollment.student_id=?";
-    private static final String ENROLL_STUDENT = "INSERT INTO course_enrollment (course_id, student_id) VALUES (?, ?)";
+    private static final String ENROLL_STUDENT = "INSERT INTO course_enrollment (course_id, exercise_1_score,  exercise_2_score, exercise_3_score, exercise_4_score, exercise_5_score, passed, written_score, student_id) VALUES (?, -1, -1, -1, -1 ,-1, -1, -1, ?)";
     private static final String UNENROLL_STUDENT = "DELETE FROM course_enrollment WHERE course_enrollment_id=?";
-    private static final String VIEW_ENROLLMENT = "SELECT * FROM course_enrollment WHERE course_enrollment_id=?";
+    private static final String VIEW_ENROLLMENT = "SELECT course_enrollment_id, course_id, passed, paid, student_id FROM course_enrollment WHERE course_enrollment_id=?";
 
 
 
 
     /**
      * Print student menu options and call appropriate method.
-     * @param rs result set
-     * @param ps prepared statement
+     *
+     * @param rs   result set
+     * @param ps   prepared statement
      * @param conn connection
-     * @param scanner scanner
      * @throws SQLException SQL exception
      */
-    public void menu(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    public void menu(ResultSet rs, PreparedStatement ps, Connection conn) throws SQLException {
         int selection;
+        Scanner scanner = new Scanner(System.in);
 
         while(true) {
             printMenu();
             try {
-                selection = scanner.nextInt();
+                selection = Integer.parseInt(scanner.nextLine());
                 switch (selection) {
-                    case 1 -> manageStudents(rs, ps, conn, scanner);
-                    case 2 -> studentEnrollment(rs, ps, conn, scanner);
+                    case 1 -> manageStudents(rs, ps, conn);
+                    case 2 -> studentEnrollment(rs, ps, conn);
                     case 0 -> {
                         return;
                     }
                     default -> System.out.println("Please enter an integer between 0 and 2");
                 }
 
-            }catch (InputMismatchException ex){
-                System.out.println("Please enter an integer value between 0 and 2");
-                scanner.next();
+            } catch (InputMismatchException | NumberFormatException ex) {
+                System.out.println("Please enter an integer value between 0 and 5");
+                scanner.nextLine();
             }
         }
     }
@@ -71,20 +73,21 @@ public class StudentMenu {
      * @param rs result set
      * @param ps prepared statement
      * @param conn connection
-     * @param scanner scanner
      * @throws SQLException SQL exception
      */
-    public void manageStudents(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    public void manageStudents(ResultSet rs, PreparedStatement ps, Connection conn) throws SQLException {
         int selection;
+
+        Scanner scanner = new Scanner(System.in);
 
         while(true) {
             printManageMenu();
             try {
-                selection = scanner.nextInt();
+                selection = Integer.parseInt(scanner.nextLine());
                 switch (selection) {
                     case 1 -> createStudent(rs, ps, conn, scanner);
                     case 2 -> viewStudents(rs, conn);
-                    case 3 -> editStudent(ps, conn, scanner);
+                    case 3 -> editStudent(rs, ps, conn, scanner);
                     case 4 -> deleteStudent(rs, ps, conn, scanner);
                     case 5 -> studentReport(rs, ps, conn, scanner);
                     case 0 -> {
@@ -93,9 +96,9 @@ public class StudentMenu {
                     default -> System.out.println("Please enter an integer between 0 and 5");
                 }
 
-            }catch (InputMismatchException ex){
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Please enter an integer value between 0 and 5");
-                scanner.next();
+                scanner.nextLine();
             }
         }
     }
@@ -128,80 +131,89 @@ public class StudentMenu {
 
 
         System.out.print("Please enter a Student name between 1-30 characters: ");
-        String student_name = scanner.next();
+        String student_name = scanner.nextLine();
 
         System.out.print("Please enter an address between 1-50 characters: ");
-        String address = scanner.next();
+        String address = scanner.nextLine();
 
         try {
             System.out.print("Please enter a numeric birth month value: ");
-            birthMonth = scanner.nextInt();
+            birthMonth = Integer.parseInt(scanner.nextLine());
 
             System.out.print("Please enter birth day: ");
-            birthDay = scanner.nextInt();
+            birthDay = Integer.parseInt(scanner.nextLine());
 
             System.out.print("Please enter birth year: ");
-            birthYear = scanner.nextInt();
+            birthYear = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
 
-        dateBirth = createLocalDate(birthYear, birthMonth, birthDay);
+        try {
+            dateBirth = createBirthday(birthYear, birthMonth, birthDay);
+        } catch (DateTimeException e) {
+            System.out.println("Invalid date entered");
+            return;
+        }
 
 
         System.out.print("Please enter phone number (5555551234): ");
-        String phone = scanner.next();
+        String phone = scanner.nextLine();
 
-        try {
-            conn.setAutoCommit(false); // do not autocommit
-            ps = conn.prepareStatement(CREATE_PERSON);
-            ps.setString(1, student_name);
-            ps.setString(2, address);
-            ps.setDate(3, Date.valueOf(dateBirth));
-            ps.setString(4, phone);
-
-            int result = ps.executeUpdate();
-
-            if (result > 0) { //success
-                ps = conn.prepareStatement(SELECT_PERSON_BY_ID);
+        if (student_name != null && !student_name.equals("") && address != null && !address.equals("") && phone != null && !phone.equals("")) {
+            try {
+                conn.setAutoCommit(false); // do not autocommit
+                ps = conn.prepareStatement(CREATE_PERSON);
                 ps.setString(1, student_name);
                 ps.setString(2, address);
                 ps.setDate(3, Date.valueOf(dateBirth));
                 ps.setString(4, phone);
 
-                rs = ps.executeQuery();
-                int personId = 0;
+                int result = ps.executeUpdate();
 
-                while (rs.next()) {
-                    personId = rs.getInt(1);
-                }
+                if (result > 0) { //success
+                    ps = conn.prepareStatement(SELECT_PERSON_BY_ID);
+                    ps.setString(1, student_name);
+                    ps.setString(2, address);
+                    ps.setDate(3, Date.valueOf(dateBirth));
+                    ps.setString(4, phone);
 
-                if(personId != 0) { //success
-                    ps = conn.prepareStatement(CREATE_STUDENT);
-                    ps.setInt(1, personId);
-                    result = ps.executeUpdate();
+                    rs = ps.executeQuery();
+                    int personId = 0;
 
-                    if (result > 0) { //success
-                        System.out.println("Successfully added Student!");
-                        conn.commit();
+
+                    while (rs.next()) {
+                        personId = rs.getInt(1);
+                    }
+
+                    if(personId != 0) { //success
+                        ps = conn.prepareStatement(CREATE_STUDENT);
+                        ps.setInt(1, personId);
+                        result = ps.executeUpdate();
+
+                        if (result > 0) { //success
+                            System.out.println("Successfully added Student!");
+                            conn.commit();
+                        } else {
+                            System.out.println("Unable to add Student");
+                            conn.rollback();
+                        }
                     } else {
-                        System.out.println("Unable to add Student");
+                        // no person_id
+                        System.out.println("Unable to find Person");
                         conn.rollback();
                     }
                 } else {
-                    // no person_id
-                    System.out.println("Unable to find Person");
+                    System.out.println("Unable to create Person");
                     conn.rollback();
                 }
-            } else {
-                System.out.println("Unable to create Person");
-                conn.rollback();
+            } catch (SQLException sqlx) {
+                System.out.println("SQL Exception");
+                closeResource(rs, ps, conn);
             }
-        } catch (SQLException sqlx) {
-            System.out.println("SQL Exception");
-        } finally {
-            closeResource(rs, ps, conn, scanner);
+        } else {
+            System.out.println("Failed to create student - Missing Information");
         }
     }
 
@@ -222,7 +234,6 @@ public class StudentMenu {
 
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
-        } finally {
             closeResource(rs, conn, stmt);
         }
     }
@@ -233,16 +244,14 @@ public class StudentMenu {
      *     Parameter 2: Value to change
      *     Parameter 3: New value
      *     Parameter X: …
-     * UPDATE person
-     * SET ?=?
-     * FROM person,student
-     * WHERE person.person_id=student.person_id AND student.student_id=?;
+     * UPDATE person SET ?=?
+     * WHERE person_id=(SELECT person_id FROM student WHERE student_id=?);
      * @param ps prepared statement
      * @param conn connection
      * @param scanner scanner
      * @throws SQLException SQL exception
      */
-    public void editStudent(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    public void editStudent(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         conn.setAutoCommit(false); // do not autocommit
         int birthMonth = 0;
         int birthDay = 0;
@@ -253,116 +262,140 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Student ID: ");
-            studentId = scanner.nextInt();
+            studentId = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
-
-        System.out.println("Please enter values to change or leave blank to skip");
-        System.out.print("Enter a Student name between 1-30 characters: ");
-        String student_name = scanner.next();
-
-        System.out.print("Enter an address between 1-50 characters: ");
-        String address = scanner.next();
 
         try {
-            System.out.print("Do you want to change the birthday? Enter 'y' or 'n': ");
-            String changeBDay = scanner.next();
-            if (changeBDay.equalsIgnoreCase("y")) {
-                cBD = true;
-                System.out.println("Month, day, and year must be entered to change birthday");
-                System.out.print("Enter a numeric birth month value: ");
-                birthMonth = scanner.nextInt();
+            ps = conn.prepareStatement(SELECT_STUDENT);
+            ps.setInt(1, studentId);
 
-                System.out.print("Enter birth day: ");
-                birthDay = scanner.nextInt();
+            rs = ps.executeQuery();
+            int personId = 0;
 
-                System.out.print("Enter birth year: ");
-                birthYear = scanner.nextInt();
+            while (rs.next()) {
+                personId = rs.getInt(1);
             }
-        } catch (InputMismatchException e) {
-            System.out.println("Number must be an integer");
-            return;
-        }
 
-        if (cBD && birthYear != 0 && birthMonth != 0 && birthDay != 0) {
-            dateBirth = createLocalDate(birthYear, birthMonth, birthDay);
-        }
+            if(personId != 0) { //success, found person
+                System.out.println("Please enter values to change or leave blank to skip");
+                System.out.print("Enter a Student name between 1-30 characters: ");
+                String student_name = scanner.nextLine();
 
+                System.out.print("Enter an address between 1-50 characters: ");
+                String address = scanner.nextLine();
 
-        System.out.print("Please enter phone number (5555551234): ");
-        String phone = scanner.next();
+                try {
+                    System.out.println("Do you want to change the birthday? Enter 'y' or 'n': ");
+                    String changeBDay = scanner.nextLine();
+                    if (changeBDay.equalsIgnoreCase("y")) {
+                        cBD = true;
+                        System.out.println("Month, day, and year must be entered to change birthday");
+                        System.out.print("Enter a numeric birth month value: ");
+                        birthMonth = Integer.parseInt(scanner.nextLine());
 
-        String statement = "UPDATE person SET ";
-        
-        boolean name = false;
-        boolean addy = false;
-        boolean bday = false;
-        boolean tele = false;
+                        System.out.print("Enter birth day: ");
+                        birthDay = Integer.parseInt(scanner.nextLine());
 
-        if (student_name != null && !student_name.equals("")) {
-            statement += "full_name=?,";
-            name = true;
-        }
-        if (address != null && !address.equals("")) {
-            statement += "address=?,";
-            addy = true;
-        }
-        if (dateBirth != null) {
-            statement += "date_birth=?,";
-            bday = true;
-        }
-        if (phone != null && !phone.equals("")) {
-            statement += "phone=?,";
-            tele = true;
-        }
-
-        if (statement.endsWith(",")) {
-            statement = statement.substring(0, statement.length()-1);
-        }
-
-        statement += " FROM person,student WHERE person.person_id=student.person_id AND student.studentId=?";
-
-        if (name || addy || bday || tele) {
-            try {
-                ps = conn.prepareStatement(statement);
-                int i = 1;
-
-                if (name) {
-                    ps.setString(i, student_name);
-                    i++;
+                        System.out.print("Enter birth year: ");
+                        birthYear = Integer.parseInt(scanner.nextLine());
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Number must be an integer");
+                    return;
                 }
-                if (addy) {
-                    ps.setString(i, address);
-                    i++;
-                }
-                if (bday) {
-                    ps.setDate(i, Date.valueOf(dateBirth));
-                    i++;
-                }
-                if (tele) {
-                    ps.setString(i, phone);
-                    i++;
-                }
-                ps.setInt(i, studentId);
 
-                int result = ps.executeUpdate();
+                if (cBD && birthYear != 0 && birthMonth != 0 && birthDay != 0) {
+                    try {
+                        dateBirth = createBirthday(birthYear, birthMonth, birthDay);
+                    } catch (DateTimeException e) {
+                        return;
+                    }
+                }
 
-                if (result > 0) { //success
-                    System.out.println("Updated Student!");
-                    conn.commit();
+
+                System.out.print("Please enter phone number (5555551234): ");
+                String phone = scanner.nextLine();
+
+                String statement = "UPDATE person SET ";
+
+                boolean name = false;
+                boolean addy = false;
+                boolean bday = false;
+                boolean tele = false;
+
+                if (student_name != null && !student_name.equals("")) {
+                    statement += "full_name=?,";
+                    name = true;
+                }
+                if (address != null && !address.equals("")) {
+                    statement += "address=?,";
+                    addy = true;
+                }
+                if (dateBirth != null) {
+                    statement += "date_birth=?,";
+                    bday = true;
+                }
+                if (phone != null && !phone.equals("")) {
+                    statement += "phone=?,";
+                    tele = true;
+                }
+
+                if (statement.endsWith(",")) {
+                    statement = statement.substring(0, statement.length()-1);
+                }
+
+                statement += " WHERE person_id=?";
+
+                if (name || addy || bday || tele) {
+                    try {
+                        ps = conn.prepareStatement(statement);
+                        int i = 1;
+
+                        if (name) {
+                            ps.setString(i, student_name);
+                            i++;
+                        }
+                        if (addy) {
+                            ps.setString(i, address);
+                            i++;
+                        }
+                        if (bday) {
+                            ps.setDate(i, Date.valueOf(dateBirth));
+                            i++;
+                        }
+                        if (tele) {
+                            ps.setString(i, phone);
+                            i++;
+                        }
+                        ps.setInt(i, personId);
+
+                        int result = ps.executeUpdate();
+
+                        if (result > 0) { //success
+                            System.out.println("Updated Student!");
+                            conn.commit();
+                        } else {
+                            System.out.println("Unable to create Person");
+                            conn.rollback();
+                        }
+                    } catch (SQLException sqlx) {
+                        System.out.println("SQL Exception");
+                        closeResource(rs, ps, conn);
+                    }
                 } else {
-                    System.out.println("Unable to create Person");
-                    conn.rollback();
+                    System.out.println("No values to change");
                 }
-            } catch (SQLException sqlx) {
-                System.out.println("SQL Exception");
-            } finally {
-                closeResource(ps, conn, scanner);
+            } else {
+                // no person_id
+                System.out.println("Unable to find Student");
+                conn.rollback();
             }
-        } else {
-            System.out.println("No values to change");
+        } catch (SQLException sqlx) {
+            System.out.println("SQL Exception");
+            closeResource(rs, ps, conn);
         }
     }
 
@@ -386,7 +419,7 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Student ID: ");
-            studentId = scanner.nextInt();
+            studentId = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
@@ -410,27 +443,16 @@ public class StudentMenu {
                 int result = ps.executeUpdate();
 
                 if (result > 0) { //success, deleted person
-//                        System.out.println("Successfully added Student!");
                     ps = conn.prepareStatement(DELETE_COURSE_ENROLLMENT);
                     ps.setInt(1, studentId);
+                    ps.executeUpdate();
+
+                    ps = conn.prepareStatement(DELETE_STUDENT);
+                    ps.setInt(1, studentId);
                     result = ps.executeUpdate();
+                    System.out.println("Deleted Student!");
+                    conn.commit();
 
-                    if (result > 0) { //success, deleted course_enrollment
-                        ps = conn.prepareStatement(DELETE_STUDENT);
-                        ps.setInt(1, studentId);
-                        result = ps.executeUpdate();
-
-                        if (result > 0) { //success, deleted student
-                            System.out.println("Deleted Student!");
-                            conn.commit();
-                        } else { //failure, delete student
-                            System.out.println("Unable to delete Student");
-                            conn.rollback();
-                        }
-                    } else { //failure, delete course_enrollment
-                        System.out.println("Unable to delete Course Enrollment");
-                        conn.rollback();
-                    }
                 } else { //failed, delete person
                     System.out.println("Unable to delete Person");
                     conn.rollback();
@@ -442,8 +464,7 @@ public class StudentMenu {
             }
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
-        } finally {
-            closeResource(rs, ps, conn, scanner);
+            closeResource(rs, ps, conn);
         }
     }
 
@@ -464,16 +485,16 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Student ID: ");
-            studentId = scanner.nextInt();
+            studentId = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
 
-        print(rs, ps, conn, scanner, studentId, STUDENT_REPORT);
+        print(rs, ps, conn, studentId, STUDENT_REPORT);
     }
 
-    private void print(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner, int Id, String query) {
+    private void print(ResultSet rs, PreparedStatement ps, Connection conn, int Id, String query) {
         try {
             conn.setAutoCommit(false); // do not autocommit
             ps = conn.prepareStatement(query);
@@ -484,8 +505,7 @@ public class StudentMenu {
 
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
-        } finally {
-            closeResource(rs, ps, conn, scanner);
+            closeResource(rs, ps, conn);
         }
     }
 
@@ -494,16 +514,16 @@ public class StudentMenu {
      * @param rs result set
      * @param ps prepared statement
      * @param conn connection
-     * @param scanner scanner
      * @throws SQLException SQL exception
      */
-    public void studentEnrollment(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    public void studentEnrollment(ResultSet rs, PreparedStatement ps, Connection conn) throws SQLException {
         int selection;
+        Scanner scanner = new Scanner(System.in);
 
         while(true) {
             printEnrollmentMenu();
             try {
-                selection = scanner.nextInt();
+                selection = Integer.parseInt(scanner.nextLine());
                 switch (selection) {
                     case 1 -> enrollStudent(ps, conn, scanner);
                     case 2 -> unenrollStudent(ps, conn, scanner);
@@ -515,9 +535,9 @@ public class StudentMenu {
                     default -> System.out.println("Please enter an integer between 0 and 4");
                 }
 
-            }catch (InputMismatchException ex){
-                System.out.println("Please enter an integer value between 0 and 4" );
-                scanner.next();
+            } catch (InputMismatchException | NumberFormatException ex) {
+                System.out.println("Please enter an integer value between 0 and 5");
+                scanner.nextLine();
             }
         }
     }
@@ -537,10 +557,10 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Course ID: ");
-            courseId = scanner.nextInt();
+            courseId = Integer.parseInt(scanner.nextLine());
 
             System.out.print("Please Enter Student ID: ");
-            studentId = scanner.nextInt();
+            studentId = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
@@ -564,8 +584,7 @@ public class StudentMenu {
 
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
-        } finally {
-            closeResource(ps, conn, scanner);
+            closeResource(ps, conn);
         }
     }
 
@@ -582,7 +601,7 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Course Enrollment ID: ");
-            courseEnrollmentId = scanner.nextInt();
+            courseEnrollmentId = Integer.parseInt(scanner.nextLine());
 
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
@@ -606,8 +625,7 @@ public class StudentMenu {
 
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception");
-        } finally {
-            closeResource(ps, conn, scanner);
+            closeResource(ps, conn);
         }
     }
 
@@ -625,13 +643,13 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Course Enrollment ID: ");
-            courseEnrollmentId = scanner.nextInt();
+            courseEnrollmentId = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
         }
 
-        print(rs, ps, conn, scanner, courseEnrollmentId, VIEW_ENROLLMENT);
+        print(rs, ps, conn,courseEnrollmentId, VIEW_ENROLLMENT);
     }
 
     /**
@@ -654,7 +672,7 @@ public class StudentMenu {
 
         try {
             System.out.print("Please enter Course Enrollment ID: ");
-            courseEnrollmentId = scanner.nextInt();
+            courseEnrollmentId = Integer.parseInt(scanner.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Number must be an integer");
             return;
@@ -662,10 +680,10 @@ public class StudentMenu {
 
         System.out.println("Please enter values to change or leave blank to skip");
         System.out.print("Enter an Course ID: ");
-        courseId = scanner.nextInt();
+        courseId = Integer.parseInt(scanner.nextLine());
 
         System.out.print("Enter a Student ID: ");
-        studentId = scanner.nextInt();
+        studentId = Integer.parseInt(scanner.nextLine());
 
         String statement = "UPDATE course_enrollment SET ";
 
@@ -713,8 +731,7 @@ public class StudentMenu {
                 }
             } catch (SQLException sqlx) {
                 System.out.println("SQL Exception");
-            } finally {
-                closeResource(ps, conn, scanner);
+                closeResource(ps, conn);
             }
         } else {
             System.out.println("No values to change");
@@ -756,7 +773,7 @@ public class StudentMenu {
         System.out.println("0. Student Menu");
     }
 
-    private void closeResource(PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void closeResource(PreparedStatement ps, Connection conn) {
         try {
             if (conn != null) {
                 conn.close();
@@ -764,15 +781,12 @@ public class StudentMenu {
             if (ps != null) {
                 ps.close();
             }
-            if (scanner != null) {
-                scanner.close();
-            }
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception when closing resources");
         }
     }
 
-    private void closeResource(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void closeResource(ResultSet rs, Statement stmt, Connection conn) {
         try {
             if (conn != null) {
                 conn.close();
@@ -782,9 +796,6 @@ public class StudentMenu {
             }
             if (rs != null) {
                 rs.close();
-            }
-            if (scanner != null) {
-                scanner.close();
             }
         } catch (SQLException sqlx) {
             System.out.println("SQL Exception when closing resources");
