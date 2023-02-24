@@ -135,6 +135,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeTypeID);
             ps.executeUpdate();
+            System.out.println("Bike type deleted successfully");
         } catch (SQLException e) {
             System.out.println("Query failed. Please ensure the bike type id exists.");
         } finally {
@@ -188,6 +189,7 @@ public class GarageMenu {
             ps.setString(1, newValue);
             ps.setInt(2, bikeTypeID);
             ps.executeUpdate();
+            System.out.println("Bike type updated successfully");
         } catch (SQLException e) {
             System.out.println("Query failed. Please ensure input data is valid.");
         } finally {
@@ -248,6 +250,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setString(1, bikeTypeName);
             ps.executeUpdate();
+            System.out.println("Bike type created successfully.");
         } catch (SQLException e) {
             System.out.println("Query failed. Please check that the bike type name is valid.");
         } finally {
@@ -278,6 +281,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, problemID);
             ps.executeUpdate();
+            System.out.println("Problem " + problemID + " deleted successfully.");
         } catch (SQLException e) {
             System.out.println("Query failed. Please check that the problem ID is valid.");
         } finally {
@@ -338,6 +342,7 @@ public class GarageMenu {
             ps.setString(1, newValue);
             ps.setInt(2, bikeID);
             ps.executeUpdate();
+            System.out.println(attribute + " successfully updated for bike " + bikeID + ".");
         }
         catch (SQLException e) {
             System.out.println("Query failed. Ensure the bike ID is correct and try again.");
@@ -618,6 +623,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
             ps.executeUpdate();
+            System.out.println("Sucessfully deleted assignments for bike: " + bikeID);
         } catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         } finally {
