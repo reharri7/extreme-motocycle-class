@@ -185,7 +185,40 @@ public class StaffMenu {
     private void assignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
     }
 
-    private void deleteCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void deleteCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws  SQLException{
+        System.out.println("Enter Coach ID to Delete: ");
+        int coach_id = scanner.nextInt();
+
+        String query1 = "DELETE FROM person \n" +
+                "WHERE person_id=(\n" +
+                "SELECT person_id \n" +
+                "FROM coach \n" +
+                "WHERE coach_id=?);";
+        String query2 = "DELETE FROM coach_assignment WHERE coach_id=?;";
+        String query3 = "DELETE FROM coach WHERE coach_id=?;";
+
+        PreparedStatement ps = null;
+        conn.setAutoCommit(false);
+        ps = conn.prepareStatement(query1);
+        ps.setInt(1, coach_id);
+
+        PreparedStatement ps2 = null;
+        ps2 = conn.prepareStatement(query2);
+        ps2.setInt(1, coach_id);
+
+        PreparedStatement ps3 = null;
+        ps3 = conn.prepareStatement(query3);
+        ps3.setInt(1, coach_id);
+
+        try {
+            if (ps.executeUpdate() > 0 && ps2.executeUpdate() > 0 && ps3.executeUpdate() > 0) {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        } catch (SQLException e) {
+            conn.rollback();
+            e.printStackTrace();
+        }
     }
 
     private void editCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -193,10 +226,11 @@ public class StaffMenu {
 
     private void createCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException{
         System.out.println("Name");
-        String full_name = scanner.next();
+        scanner.nextLine();
+        String full_name = scanner.nextLine();
 
         System.out.println("adress");
-        String address = scanner.next();
+        String address = scanner.nextLine();
 
         System.out.println("YYYY-MM-DD");
         String birthDate  = scanner.next();
