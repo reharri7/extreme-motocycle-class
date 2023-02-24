@@ -9,6 +9,8 @@ package emc;
  */
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -113,9 +115,68 @@ public class StaffMenu {
     }
 
     private void coachAvailabilitySchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+        System.out.println("YYYY-MM-DD");
+        java.sql.Date date = java.sql.Date.valueOf(scanner.next());
+
+        System.out.println("Enter AM or PM: ");
+        String inputAmPm = scanner.next();
+        java.sql.Time time_type = java.sql.Time.valueOf(inputAmPm.equalsIgnoreCase("PM") ? LocalTime.of(12, 0) : LocalTime.of(0, 0));
+
+        String query = "SELECT * FROM coach c WHERE c.coach_id NOT IN (SELECT DISTINCT c1.coach_id \n" +
+                "FROM coach c1, coach_assignment, course_schedule, time_type\n" +
+                "WHERE c1.coach_id = coach_assignment.coach_id\n" +
+                "AND coach_assignment.course_schedule_id = course_schedule.course_schedule_id\n" +
+                "AND course_schedule.time_type_id = time_type.time_type_id\n" +
+                "AND course_schedule.course_date = ? AND time_type.time_type_value= ?);\n";
+
+        try {
+            PreparedStatement ps = null;
+            ps = conn.prepareStatement(query);
+            ps.setDate(1, date);
+            ps.setTime(2, time_type);
+
+            rs = ps.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Utils.printSet(rs);
     }
 
-    private void coachWeeklySchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void coachWeeklySchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner){
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("YYYY-MM-DD");
+        java.sql.Date week_start_date = java.sql.Date.valueOf(scanner.next());
+
+        //Calculate new date
+        LocalDate newDate = week_start_date.toLocalDate().plusDays(7);
+        java.sql.Date week_end_date = java.sql.Date.valueOf(newDate);
+
+        String query = "SELECT DISTINCT course.course_id,course.course_name,course_schedule.course_date,time_type.time_type_value \n" +
+                "FROM course,course_schedule,time_type,coach_assignment\n" +
+                "WHERE coach_assignment.coach_id=?\n" +
+                "AND course.course_id=course_schedule.course_id \n" +
+                "AND course_schedule.time_type_id=time_type.time_type_id \n" +
+                "AND course_schedule.course_date >= ? \n" +
+                "AND course_schedule.course_date < ? \n" +
+                "ORDER BY course_schedule.course_date;";
+
+
+        try {
+            PreparedStatement ps = null;
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, coach_id);
+            ps.setDate(2, week_start_date);
+            ps.setDate(3, week_end_date);
+
+            rs = ps.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Utils.printSet(rs);
     }
 
     private void unassignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
@@ -165,7 +226,6 @@ public class StaffMenu {
         ps.setString(4, phone);
 
         PreparedStatement ps1 = null;
-        conn.setAutoCommit(false);
         ps1 = conn.prepareStatement(query2);
         ps1.setString(1, full_name);
         ps1.setString(2, address);
