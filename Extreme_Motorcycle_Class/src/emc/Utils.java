@@ -16,6 +16,13 @@ public class Utils {
         return LocalDate.of(year, month, day);
     }
 
+    public static LocalDate createBirthday(int year, int month, int day) throws DateTimeException {
+        if (year > 2023) {
+            throw new DateTimeException("Invalid date entered.");
+        }
+        return LocalDate.of(year, month, day);
+    }
+
     
     /** 
      * @param r
