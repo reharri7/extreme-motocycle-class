@@ -75,6 +75,17 @@ public class StaffMenu {
         System.out.println("0. Coach Menu");
     }
 
+    private void printEditMenu() {
+        System.out.println("Choose What to Edit: ");
+        System.out.println("1. Address");
+        System.out.println("2. Birth Date");
+        System.out.println("3. Phone Number");
+        System.out.println("4. Classroom Certified");
+        System.out.println("5. Dirt Bike Certified");
+        System.out.println("6. Street Bike Certified");
+        System.out.println("0. Coach Menu");
+    }
+
     private void viewCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
         System.out.println(": ");
         String query = "SELECT coach.coach_id,person.full_name\n" +
@@ -273,6 +284,239 @@ public class StaffMenu {
     }
 
     private void editCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+        int choice;
+
+        while(true) {
+            printEditMenu();
+            try {
+                choice = scanner.nextInt();
+                switch (choice) {
+                    case 1:
+                        editAddress(rs, stmt, conn, scanner);
+                        break;
+                    case 2:
+                        editDateBirth(rs, stmt, conn, scanner);
+                        break;
+                    case 3:
+                        editPhone(rs, stmt, conn, scanner);
+                        break;
+                    case 4:
+                        editClassroom(rs, stmt, conn, scanner);
+                        break;
+                    case 5:
+                        editDirtBike(rs, stmt, conn, scanner);
+                        break;
+                    case 6:
+                        editStreetBike(rs, stmt, conn, scanner);
+                        break;
+                    case 0:
+                        return;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Please enter an integer value between 0 and 6");
+                scanner.next();
+            } catch (SQLException sqlException) {
+                sqlException.printStackTrace();
+            }
+        }
+
+    }
+
+    private void editAddress(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Address");
+        scanner.nextLine();
+        String address = scanner.nextLine();
+
+        conn.setAutoCommit(false);
+
+        PreparedStatement ps = null;
+        String query = "UPDATE person\n" +
+                "SET person.address=?\n" +
+                "WHERE person.person_id=(\n" +
+                "SELECT DISTINCT person_id \n" +
+                "FROM coach \n" +
+                "WHERE coach_id=?);\n";
+        ps = conn.prepareStatement(query);
+        ps.setString(1, address);
+        ps.setInt(2, coach_id);
+        try
+        {
+            if (ps.executeUpdate() > 0)
+            {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        }
+        catch (SQLException ex)
+        {
+            conn.rollback();
+            System.out.println("ERROR: Problem with Update." + ex.getMessage());
+        }
+    }
+
+    private void editDateBirth(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("YYYY-MM-DD");
+        java.sql.Date date_birth = java.sql.Date.valueOf(scanner.next());
+
+        conn.setAutoCommit(false);
+
+        PreparedStatement ps = null;
+        String query = "UPDATE person\n" +
+                "SET person.date_birth=?\n" +
+                "WHERE person.person_id=(\n" +
+                "SELECT DISTINCT person_id \n" +
+                "FROM coach \n" +
+                "WHERE coach_id=?);\n";
+        ps = conn.prepareStatement(query);
+        ps.setDate(1, date_birth);
+        ps.setInt(2, coach_id);
+        try
+        {
+            if (ps.executeUpdate() > 0)
+            {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        }
+        catch (SQLException ex)
+        {
+            conn.rollback();
+            System.out.println("ERROR: Problem with Update." + ex.getMessage());
+        }
+    }
+
+    private void editPhone(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Phone");
+        scanner.nextLine();
+        String phone = scanner.nextLine();
+
+        conn.setAutoCommit(false);
+
+        PreparedStatement ps = null;
+        String query = "UPDATE person\n" +
+                "SET person.phone=?\n" +
+                "WHERE person.person_id=(\n" +
+                "SELECT DISTINCT person_id \n" +
+                "FROM coach \n" +
+                "WHERE coach_id=?);\n";
+        ps = conn.prepareStatement(query);
+        ps.setString(1, phone);
+        ps.setInt(2, coach_id);
+        try
+        {
+            if (ps.executeUpdate() > 0)
+            {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        }
+        catch (SQLException ex)
+        {
+            conn.rollback();
+            System.out.println("ERROR: Problem with Update." + ex.getMessage());
+        }
+    }
+
+    private void editClassroom(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Classroom Certified");
+        int classroom_certified = scanner.nextInt();
+
+        conn.setAutoCommit(false);
+
+        PreparedStatement ps = null;
+        String query = "UPDATE coach\n" +
+                "SET coach.classroom_certified=?\n" +
+                "WHERE coach_id=?;\n";
+        ps = conn.prepareStatement(query);
+        ps.setInt(1, classroom_certified);
+        ps.setInt(2, coach_id);
+        try
+        {
+            if (ps.executeUpdate() > 0)
+            {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        }
+        catch (SQLException ex)
+        {
+            conn.rollback();
+            System.out.println("ERROR: Problem with Update." + ex.getMessage());
+        }
+    }
+
+    private void editDirtBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Dirt Bike Certified");
+        int dirtbike_certified = scanner.nextInt();
+
+        conn.setAutoCommit(false);
+
+        PreparedStatement ps = null;
+        String query = "UPDATE coach\n" +
+                "SET coach.dirtbike_certified=?\n" +
+                "WHERE coach_id=?;\n";
+        ps = conn.prepareStatement(query);
+        ps.setInt(1, dirtbike_certified);
+        ps.setInt(2, coach_id);
+        try
+        {
+            if (ps.executeUpdate() > 0)
+            {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        }
+        catch (SQLException ex)
+        {
+            conn.rollback();
+            System.out.println("ERROR: Problem with Update." + ex.getMessage());
+        }
+    }
+
+    private void editStreetBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Street Bike Certified");
+        int streetbike_certified = scanner.nextInt();
+
+        conn.setAutoCommit(false);
+
+        PreparedStatement ps = null;
+        String query = "UPDATE coach\n" +
+                "SET coach.streetbike_certified=?\n" +
+                "WHERE coach_id=?;\n";
+        ps = conn.prepareStatement(query);
+        ps.setInt(1, streetbike_certified);
+        ps.setInt(2, coach_id);
+        try
+        {
+            if (ps.executeUpdate() > 0)
+            {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        }
+        catch (SQLException ex)
+        {
+            conn.rollback();
+            System.out.println("ERROR: Problem with Update." + ex.getMessage());
+        }
     }
 
     private void createCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException{
