@@ -122,14 +122,15 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeTypeID);
             ps.executeUpdate();
+            System.out.println("Bike type deleted successfully");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Please ensure the bike type id exists.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -175,14 +176,15 @@ public class GarageMenu {
             ps.setString(1, newValue);
             ps.setInt(2, bikeTypeID);
             ps.executeUpdate();
+            System.out.println("Bike type updated successfully");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Please ensure input data is valid.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -205,14 +207,14 @@ public class GarageMenu {
             Utils.printSet(rs);
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Try again.");
         }
         finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -235,14 +237,15 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setString(1, bikeTypeName);
             ps.executeUpdate();
+            System.out.println("Bike type created successfully.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Please check that the bike type name is valid.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -265,14 +268,15 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, problemID);
             ps.executeUpdate();
+            System.out.println("Problem " + problemID + " deleted successfully.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Please check that the problem ID is valid.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -298,7 +302,8 @@ public class GarageMenu {
         try {
             newValue = br.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to read input.");
+            return;
         }
         
         // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
@@ -324,16 +329,17 @@ public class GarageMenu {
             ps.setString(1, newValue);
             ps.setInt(2, bikeID);
             ps.executeUpdate();
+            System.out.println(attribute + " successfully updated for bike " + bikeID + ".");
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Ensure the bike ID is correct and try again.");
         }
         finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -355,14 +361,14 @@ public class GarageMenu {
             Utils.printSet(rs);
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Try again.");
         }
         finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -389,7 +395,7 @@ public class GarageMenu {
         try {
             description = reader.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to close prepared statement, leaking resources.");
         }
 
         System.out.println("Please enter a date to specify the repair date (yyyy-mm-dd): ");
@@ -409,14 +415,17 @@ public class GarageMenu {
             ps.setInt(5, cost);
             ps.executeUpdate();
             System.out.println("Sucessfully created bike problem");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
+        } 
+        catch (SQLException e) {
+            System.out.println("Query failed.  Ensure you entered a valid date and did not exceed the character limit for the description.");
+        } 
+        
+        finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -447,14 +456,14 @@ public class GarageMenu {
             Utils.printSet(rs);
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         }
         finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -481,7 +490,7 @@ public class GarageMenu {
             Utils.printSet(rs);
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         }
         finally {
             try {
@@ -489,7 +498,7 @@ public class GarageMenu {
                     ps.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.out.println("Failed to close prepared statement, leaking resources.");
             }
         }
     }
@@ -514,13 +523,13 @@ public class GarageMenu {
             ps.executeUpdate();
             System.out.println("Sucessfully unassigned the bike assignment: " + bikeAssignmentID);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Ensure you entered a valid bike assignment ID.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -551,13 +560,13 @@ public class GarageMenu {
             ps.executeUpdate();
             System.out.println("Sucessfully assigned bike " + bikeID + " to course schedule " + courseScheduleID);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Ensure you entered a valid bike ID and course schedule ID.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -584,13 +593,13 @@ public class GarageMenu {
             ps.executeUpdate();
             System.out.println("Sucessfully deleted bike: " + bikeID);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -601,14 +610,15 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
             ps.executeUpdate();
+            System.out.println("Sucessfully deleted assignments for bike: " + bikeID);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -656,14 +666,13 @@ public class GarageMenu {
         } 
         catch (SQLException e) {
             System.out.println("We were unable to update the bike. Are you sure the bike exists?");
-            e.printStackTrace();
         }
         finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
@@ -683,7 +692,7 @@ public class GarageMenu {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed. Try again.");
         }
 
         // Print the resultset
@@ -730,13 +739,13 @@ public class GarageMenu {
             ps.executeUpdate();
             System.out.println("Bike created successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Query failed.  Please ensure you entered valid data.");
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    System.out.println("Failed to close prepared statement, leaking resources.");
                 }
             }
         }
