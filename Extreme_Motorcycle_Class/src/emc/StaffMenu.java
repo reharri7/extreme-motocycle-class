@@ -179,10 +179,61 @@ public class StaffMenu {
         Utils.printSet(rs);
     }
 
-    private void unassignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void unassignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Enter Coach ID");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Enter Schedule ID: ");
+        int course_schedule_id = scanner.nextInt();
+
+        String query1 = "DELETE FROM coach_assignment \n" +
+                "WHERE coach_id=? \n" +
+                "AND course_schedule_id=?;\n";
+
+        PreparedStatement ps = null;
+        conn.setAutoCommit(false);
+        ps = conn.prepareStatement(query1);
+        ps.setInt(1, coach_id);
+        ps.setInt(2, course_schedule_id);
+
+        try {
+            if (ps.executeUpdate() > 0) {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        } catch (SQLException e) {
+            conn.rollback();
+            e.printStackTrace();
+        }
     }
 
-    private void assignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void assignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws  SQLException{
+        System.out.println("Enter Schedule ID: ");
+        int course_schedule_id = scanner.nextInt();
+
+        System.out.println("Enter Coach ID");
+        int coach_id = scanner.nextInt();
+
+        System.out.println("Enter Assigned Role: ");
+        String assigned_role = scanner.next();
+
+        String query1 = "INSERT INTO coach_assignment (course_schedule_id, coach_id, assigned_role) VALUES (?, ?, ?);";
+        PreparedStatement ps = null;
+        conn.setAutoCommit(false);
+        ps = conn.prepareStatement(query1);
+        ps.setInt(1, course_schedule_id);
+        ps.setInt(2, coach_id);
+        ps.setString(3, assigned_role);
+
+        try {
+            if (ps.executeUpdate() > 0) {
+                conn.commit();
+                System.out.println("SUCCESS");
+            }
+        } catch (SQLException e) {
+            conn.rollback();
+            e.printStackTrace();
+        }
     }
 
     private void deleteCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws  SQLException{
