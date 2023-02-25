@@ -16,7 +16,6 @@ public class InfrastructureMenu {
     private static final String UPDATE_BIKE_RANGE_BY_ID = "UPDATE bike_range SET range_type = ? WHERE range_id = ?";
     private static final String DELETE_BIKE_RANGE_BY_ID = "DELETE from bike_range WHERE range_id = ?";
     private static final String INSERT_RANGE_ASSIGNMENT = "insert into range_assignment (range_id, course_schedule_id) values (?, ?)";
-    private static final String SELECT_ALL_COURSE = "SELECT * FROM course";
     private static final String SELECT_COURSE_SCHEDULE_BY_WEEK_WITHOUT_RANGE_ASSIGNMENT =
             "SELECT cs.course_schedule_id, " +
                     " cs.course_date, " +
@@ -62,7 +61,6 @@ public class InfrastructureMenu {
             "order by classroom_id";
     private static final String DELETE_RANGE_ASSIGNMENT_BY_ID = "delete from range_assignment where range_assignment_id = ?";
     private static final String INSERT_CLASSROOM = "INSERT INTO classroom (capacity) VALUES (15)";
-    private static final String UPDATE_CLASSROOM_BY_ID = "UPDATE classroom SET capacity = ? WHERE classroom_id = ?";
     private static final String SELECT_ALL_CLASSROOMS = "SELECT * FROM classroom";
     private static final String DELETE_CLASSROOM_BY_ID = "DELETE FROM classroom WHERE classroom_id = ?";
     private static final String INSERT_COURSE_SCHEDULE = "insert into course_schedule (course_id, course_date, time_type_id, classroom_id) values(?, ?, ?, ?)";
@@ -267,6 +265,8 @@ public class InfrastructureMenu {
     }
 
     private void createCourseSchedule(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
+        ResultSet resultSet = null;
+        CourseMenu.viewAllCourses(resultSet, preparedStatement, connection);
         System.out.println("Enter course id: ");
         int courseId = scanner.nextInt();
         viewClassrooms(connection);
@@ -290,7 +290,7 @@ public class InfrastructureMenu {
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setInt(3, timeType);
             preparedStatement.setInt(4, classroomId);
-            int result = preparedStatement.executeUpdate(INSERT_COURSE_SCHEDULE);
+            int result = preparedStatement.executeUpdate();
             if(result == 1) {
                 System.out.println("Course schedule created successfully.");
                 connection.commit();
@@ -692,7 +692,7 @@ public class InfrastructureMenu {
             System.out.println("Invalid date entered.");
             return;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
     }
 
@@ -738,7 +738,6 @@ public class InfrastructureMenu {
                 System.out.println(currentDate + " PM");
             } catch (SQLException e) {
                 System.out.println("Error during range schedule retrieval.");
-                e.printStackTrace();
             }
         }
     }
@@ -769,7 +768,7 @@ public class InfrastructureMenu {
             System.out.println("Course Schedule");
             Utils.printSet(courseScheduleResultSet);
         } catch(SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
 
         System.out.println("Enter course schedule ID for which you would like to assign a range: ");
@@ -809,7 +808,7 @@ public class InfrastructureMenu {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
         System.out.println("Enter range ID to assign: ");
         int rangeId = scanner.nextInt();
@@ -833,7 +832,7 @@ public class InfrastructureMenu {
                 connection.rollback();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
     }
     private void unassignRange(Connection connection,
@@ -889,6 +888,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type creation.");
+            e.getMessage();
         }
     }
 
@@ -903,6 +903,7 @@ public class InfrastructureMenu {
             Utils.printSet(resultSet);
         } catch (SQLException e) {
             System.out.println("Error during range type retrieval.");
+            e.getMessage();
         } finally {
             try {
                 if(resultSet != null) {
@@ -923,6 +924,7 @@ public class InfrastructureMenu {
             preparedStatement = connection.prepareStatement(SELECT_FROM_BIKE_RANGE_BY_ID);
         } catch (SQLException e) {
             System.out.println("Error during range retrieval.");
+            e.getMessage();
         }
         try {
             preparedStatement.setInt(1, rangeId);
@@ -932,6 +934,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range retrieval.");
+            e.getMessage();
         } finally {
             try {
                 if(resultSet != null) {
@@ -962,6 +965,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type retrieval.");
+            e.getMessage();
         } finally {
             try {
                 if(resultSet != null) {
@@ -1033,6 +1037,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type deletion.");
+            e.getMessage();
         }
     }
     private void printRangeMenu() {
