@@ -17,7 +17,7 @@ public class GarageMenu {
      * @param scanner
      * @throws SQLException
      */
-    public void menu(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    public void menu(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         int selection;
 
         while (true) {
@@ -26,52 +26,52 @@ public class GarageMenu {
                 selection = scanner.nextInt();
                 switch (selection) {
                     case 1:
-                        createBike(rs, stmt, conn, scanner);
+                        createBike(rs, ps, conn, scanner);
                         break;
                     case 2:
-                        viewBike(rs, stmt, conn, scanner);
+                        viewBike(rs, ps, conn, scanner);
                         break;
                     case 3:
-                        editBike(rs, stmt, conn, scanner);
+                        editBike(rs, ps, conn, scanner);
                         break;
                     case 4:
-                        deleteBike(rs, stmt, conn, scanner);
+                        deleteBike(rs, ps, conn, scanner);
                         break;
                     case 5:
-                        assignBike(rs, stmt, conn, scanner);
+                        assignBike(rs, ps, conn, scanner);
                         break;
                     case 6:
-                        unassignBike(rs, stmt, conn, scanner);
+                        unassignBike(rs, ps, conn, scanner);
                         break;
                     case 7:
-                        bikeProblemReport(rs, stmt, conn, scanner);
+                        bikeProblemReport(rs, ps, conn, scanner);
                         break;
                     case 8:
-                        bikeAssignmentReport(rs, stmt, conn, scanner);
+                        bikeAssignmentReport(rs, ps, conn, scanner);
                         break;
                     case 9:
-                        createBikeProblem(rs, stmt, conn, scanner);
+                        createBikeProblem(rs, ps, conn, scanner);
                         break;
                     case 10:
-                        viewBikeProblem(rs, stmt, conn, scanner);
+                        viewBikeProblem(rs, ps, conn, scanner);
                         break;
                     case 11:
-                        editBikeProblem(rs, stmt, conn, scanner);
+                        editBikeProblem(rs, ps, conn, scanner);
                         break;
                     case 12:
-                        deleteBikeProblem(rs, stmt, conn, scanner);
+                        deleteBikeProblem(rs, ps, conn, scanner);
                         break;
                     case 13:
-                        createBikeType(rs, stmt, conn, scanner);
+                        createBikeType(rs, ps, conn, scanner);
                         break;
                     case 14:
-                        viewBikeTypes(rs, stmt, conn, scanner);
+                        viewBikeTypes(rs, ps, conn, scanner);
                         break;
                     case 15:
-                        editBikeType(rs, stmt, conn, scanner);
+                        editBikeType(rs, ps, conn, scanner);
                         break;
                     case 16:
-                        deleteBikeType(rs, stmt, conn, scanner);
+                        deleteBikeType(rs, ps, conn, scanner);
                         break;
                     case 0:
                         return;
@@ -112,12 +112,11 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void deleteBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void deleteBikeType(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
 
         String query = "DELETE FROM bike_type WHERE bike_type_id=?";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeTypeID);
@@ -143,7 +142,7 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void editBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void editBikeType(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
         int bikeTypeID = scanner.nextInt();
 
@@ -170,7 +169,6 @@ public class GarageMenu {
 
         String query = "UPDATE bike_type SET " + attribute + "=? WHERE bike_type_id=?";
 
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, newValue);
@@ -197,10 +195,9 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void viewBikeTypes(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void viewBikeTypes(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Here are all the bike types registered:");
         String query = "SELECT * FROM bike_type";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
@@ -227,12 +224,11 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void createBikeType(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void createBikeType(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
         String bikeTypeName = scanner.next();
 
         String query = "INSERT INTO bike_type (bike_type_value) VALUES (?)";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, bikeTypeName);
@@ -258,12 +254,11 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void deleteBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void deleteBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the problem ID: ");
         int problemID = scanner.nextInt();
 
         String query = "DELETE FROM problem WHERE problem_id=?";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, problemID);
@@ -289,7 +284,7 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void editBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void editBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
@@ -322,7 +317,6 @@ public class GarageMenu {
         }
 
         String query = "UPDATE problem SET " + attribute + "=? WHERE bike_id=?";
-        PreparedStatement ps = null;
 
         try {
             ps = conn.prepareStatement(query);
@@ -352,9 +346,8 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void viewBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void viewBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         String query = "SELECT * FROM problem";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
@@ -381,7 +374,7 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void createBikeProblem(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void createBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
@@ -405,7 +398,6 @@ public class GarageMenu {
         int cost = scanner.nextInt();
 
         String query = "INSERT INTO problem (problem_date, bike_id, repair_date, description, cost) VALUES (?, ?, ?, ?, ?)";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, date);
@@ -438,7 +430,7 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void bikeAssignmentReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void bikeAssignmentReport(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bikes ID: ");
         int bikeID = scanner.nextInt();
 
@@ -448,7 +440,6 @@ public class GarageMenu {
             + "AND course_schedule.course_id=course.course_id "
             + "AND bike_assignment.bike_id=?";
 
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
@@ -477,12 +468,12 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void bikeProblemReport(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void bikeProblemReport(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
         String query = "SELECT problem_date,repair_date,description,cost FROM problem WHERE bike_id=?";
-        PreparedStatement ps = null;
+        
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
@@ -511,11 +502,10 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void unassignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void unassignBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike assignment ID: ");
         int bikeAssignmentID = scanner.nextInt();
 
-        PreparedStatement ps = null;
         String query = "DELETE FROM bike_assignment WHERE bike_assignment_id = ?";
         try {
             ps = conn.prepareStatement(query);
@@ -543,14 +533,13 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void assignBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void assignBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = scanner.nextInt();
 
         System.out.println("Please a number for the course schedule's ID: ");
         int courseScheduleID = scanner.nextInt();
 
-        PreparedStatement ps = null;
         String query = "INSERT INTO bike_assignment (course_schedule_id, bike_id) VALUES (?, ?)";
 
         try {
@@ -580,13 +569,12 @@ public class GarageMenu {
      * @param conn
      * @param scanner
      */
-    private void deleteBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void deleteBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to delete: ");
         int bikeID = scanner.nextInt();
 
         // Delete from bike
         String query = "DELETE FROM bike WHERE bike_id=?";
-        PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);

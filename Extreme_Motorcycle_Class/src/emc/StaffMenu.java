@@ -11,14 +11,12 @@ package emc;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class StaffMenu {
 
-    public void menu(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws  SQLException {
+    public void menu(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException {
         int choice;
 
         while(true) {
@@ -27,25 +25,25 @@ public class StaffMenu {
                 choice = scanner.nextInt();
                 switch (choice) {
                     case 1:
-                        createCoach(rs, stmt, conn, scanner);
+                        createCoach(rs, ps, conn, scanner);
                         break;
                     case 2:
-                        viewCoach(rs, stmt, conn, scanner);
+                        viewCoach(rs, ps, conn, scanner);
                         break;
                     case 3:
-                        editCoach(rs, stmt, conn, scanner);
+                        editCoach(rs, ps, conn, scanner);
                         break;
                     case 4:
-                        deleteCoach(rs, stmt, conn, scanner);
+                        deleteCoach(rs, ps, conn, scanner);
                         break;
                     case 5:
-                        assignCoach(rs, stmt, conn, scanner);
+                        assignCoach(rs, ps, conn, scanner);
                         break;
                     case 6:
-                        unassignCoach(rs, stmt, conn, scanner);
+                        unassignCoach(rs, ps, conn, scanner);
                         break;
                     case 7:
-                        viewCoachSchedule(rs, stmt, conn, scanner);
+                        viewCoachSchedule(rs, ps, conn, scanner);
                         break;
                     case 0:
                         return;
@@ -88,14 +86,13 @@ public class StaffMenu {
         System.out.println("0. Coach Menu");
     }
 
-    private void viewCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void viewCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println(": ");
         String query = "SELECT coach.coach_id,person.full_name\n" +
                 "FROM coach,person \n" +
                 "WHERE coach.person_id=person.person_id;\n";
         try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(query);
+            rs = ps.executeQuery(query);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -103,7 +100,7 @@ public class StaffMenu {
         Utils.printSet(rs);
     }
 
-    private void viewCoachSchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void viewCoachSchedule(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         int choice;
 
         while(true) {
@@ -112,10 +109,10 @@ public class StaffMenu {
                 choice = scanner.nextInt();
                 switch (choice) {
                     case 1:
-                        coachWeeklySchedule(rs, stmt, conn, scanner);
+                        coachWeeklySchedule(rs, ps, conn, scanner);
                         break;
                     case 2:
-                        coachAvailabilitySchedule(rs, stmt, conn, scanner);
+                        coachAvailabilitySchedule(rs, ps, conn, scanner);
                         break;
                     case 0:
                         return;
@@ -127,30 +124,13 @@ public class StaffMenu {
         }
     }
 
-    private void coachAvailabilitySchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
-        System.out.println("Please enter the date (format: yyyy-mm-dd): ");
+    private void coachAvailabilitySchedule(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+        System.out.println("YYYY-MM-DD");
         scanner.nextLine();
-        String date = scanner.nextLine().trim();
-        try {
-            LocalDate.parse(date);
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in YYYY-MM-DD format.");
-            return;
-        }
+        String date = scanner.nextLine();
 
-        System.out.println("Please enter the time type ('AM range' or 'PM range'): ");
+        System.out.println("Enter 'AM range' or 'PM range': ");
         String time_type = scanner.nextLine();
-        Pattern pattern = Pattern.compile("^(AM|PM) range$");
-
-        if (pattern.matcher(time_type).matches()) {
-            // valid input format, proceed with processing
-            LocalTime localTime = LocalTime.parse("12:00:00"); // replace with your own parsing logic
-            // rest of your code
-        } else {
-            // invalid input format, display an error message or handle the error
-            System.out.println("Error: Invalid time_type format. Please enter 'AM range' or 'PM range'.");
-            return;
-        }
 
         String query = "SELECT * FROM coach c WHERE c.coach_id NOT IN (SELECT DISTINCT c1.coach_id \n" +
                 "FROM coach c1, coach_assignment, course_schedule, time_type\n" +
@@ -160,11 +140,10 @@ public class StaffMenu {
                 "AND course_schedule.course_date = ? AND time_type.time_type_value= ?);\n";
 
         try {
-            PreparedStatement ps = null;
             ps = conn.prepareStatement(query);
-            ps.setDate(1, java.sql.Date.valueOf(date));
+            ps.setString(1, date);
             ps.setString(2, time_type);
-//            System.out.println(ps.toString());
+            System.out.println(ps.toString());
             rs = ps.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -173,22 +152,15 @@ public class StaffMenu {
         Utils.printSet(rs);
     }
 
-    private void coachWeeklySchedule(ResultSet rs, Statement stmt, Connection conn, Scanner scanner){
-        System.out.println("Please enter the coach ID: ");
+    private void coachWeeklySchedule(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner){
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter the start date of the week (format: yyyy-mm-dd): ");
-        scanner.nextLine();
-        String week_start_date = scanner.nextLine().trim();
-        try {
-            LocalDate.parse(week_start_date);
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in YYYY-MM-DD format.");
-            return;
-        }
+        System.out.println("YYYY-MM-DD");
+        java.sql.Date week_start_date = java.sql.Date.valueOf(scanner.next());
 
         //Calculate new date
-        LocalDate newDate = LocalDate.parse(week_start_date).plusDays(7);
+        LocalDate newDate = week_start_date.toLocalDate().plusDays(7);
         java.sql.Date week_end_date = java.sql.Date.valueOf(newDate);
 
         String query = "SELECT DISTINCT course.course_id,course.course_name,course_schedule.course_date,time_type.time_type_value \n" +
@@ -203,10 +175,9 @@ public class StaffMenu {
 
 
         try {
-            PreparedStatement ps = null;
             ps = conn.prepareStatement(query);
             ps.setInt(1, coach_id);
-            ps.setDate(2, java.sql.Date.valueOf(week_start_date));
+            ps.setDate(2, week_start_date);
             ps.setDate(3, week_end_date);
 
             rs = ps.executeQuery();
@@ -217,7 +188,7 @@ public class StaffMenu {
         Utils.printSet(rs);
     }
 
-    private void unassignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
+    private void unassignCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Enter Coach ID");
         int coach_id = scanner.nextInt();
 
@@ -228,7 +199,6 @@ public class StaffMenu {
                 "WHERE coach_id=? \n" +
                 "AND course_schedule_id=?;\n";
 
-        PreparedStatement ps = null;
         conn.setAutoCommit(false);
         ps = conn.prepareStatement(query1);
         ps.setInt(1, coach_id);
@@ -241,27 +211,21 @@ public class StaffMenu {
             }
         } catch (SQLException e) {
             conn.rollback();
-            System.err.println("Error unassigning coach: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void assignCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws  SQLException{
-        System.out.println("Please enter the course schedule ID: ");
+    private void assignCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException{
+        System.out.println("Enter Schedule ID: ");
         int course_schedule_id = scanner.nextInt();
 
-        System.out.println("Please enter the coach ID: ");
+        System.out.println("Enter Coach ID");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter the assigned role ('Range' or 'Classroom'): ");
+        System.out.println("Enter Assigned Role: ");
         String assigned_role = scanner.next();
-        if (!assigned_role.matches("Range|Classroom")) {
-            System.out.println("Error: Invalid input. Please enter 'Range' or 'Classroom'.");
-            return;
-        }
-
 
         String query1 = "INSERT INTO coach_assignment (course_schedule_id, coach_id, assigned_role) VALUES (?, ?, ?);";
-        PreparedStatement ps = null;
         conn.setAutoCommit(false);
         ps = conn.prepareStatement(query1);
         ps.setInt(1, course_schedule_id);
@@ -279,7 +243,7 @@ public class StaffMenu {
         }
     }
 
-    private void deleteCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws  SQLException{
+    private void deleteCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException{
         System.out.println("Enter Coach ID to Delete: ");
         int coach_id = scanner.nextInt();
 
@@ -288,15 +252,25 @@ public class StaffMenu {
                 "SELECT person_id \n" +
                 "FROM coach \n" +
                 "WHERE coach_id=?);";
+        String query2 = "DELETE FROM coach_assignment WHERE coach_id=?;";
+        String query3 = "DELETE FROM coach WHERE coach_id=?;";
 
-
-        PreparedStatement ps = null;
         conn.setAutoCommit(false);
         ps = conn.prepareStatement(query1);
         ps.setInt(1, coach_id);
 
+        PreparedStatement ps2 = null;
+        ps2 = conn.prepareStatement(query2);
+        ps2.setInt(1, coach_id);
+
+        PreparedStatement ps3 = null;
+        ps3 = conn.prepareStatement(query3);
+        ps3.setInt(1, coach_id);
+
+        
+        ps.executeUpdate();
         try {
-            if (ps.executeUpdate() > 0) {
+            if (true) {
                 conn.commit();
                 System.out.println("SUCCESS");
             }
@@ -306,7 +280,7 @@ public class StaffMenu {
         }
     }
 
-    private void editCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void editCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         int choice;
 
         while(true) {
@@ -315,22 +289,22 @@ public class StaffMenu {
                 choice = scanner.nextInt();
                 switch (choice) {
                     case 1:
-                        editAddress(rs, stmt, conn, scanner);
+                        editAddress(rs, ps, conn, scanner);
                         break;
                     case 2:
-                        editDateBirth(rs, stmt, conn, scanner);
+                        editDateBirth(rs, ps, conn, scanner);
                         break;
                     case 3:
-                        editPhone(rs, stmt, conn, scanner);
+                        editPhone(rs, ps, conn, scanner);
                         break;
                     case 4:
-                        editClassroom(rs, stmt, conn, scanner);
+                        editClassroom(rs, ps, conn, scanner);
                         break;
                     case 5:
-                        editDirtBike(rs, stmt, conn, scanner);
+                        editDirtBike(rs, ps, conn, scanner);
                         break;
                     case 6:
-                        editStreetBike(rs, stmt, conn, scanner);
+                        editStreetBike(rs, ps, conn, scanner);
                         break;
                     case 0:
                         return;
@@ -345,21 +319,16 @@ public class StaffMenu {
 
     }
 
-    private void editAddress(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
-        System.out.println("Please enter the coach ID you want to edit: ");
+    private void editAddress(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter the new address (max 50 characters): ");
+        System.out.println("Address");
         scanner.nextLine();
         String address = scanner.nextLine();
-        if (address.length() > 50) {
-            System.out.println("Error: Address exceeds maximum length of 50 characters.");
-            return;
-        }
 
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = null;
         String query = "UPDATE person\n" +
                 "SET person.address=?\n" +
                 "WHERE person.person_id=(\n" +
@@ -384,23 +353,15 @@ public class StaffMenu {
         }
     }
 
-    private void editDateBirth(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
-        System.out.println("Please enter the coach ID you want to edit: ");
+    private void editDateBirth(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter the new date (format: yyyy-mm-dd): ");
-        scanner.nextLine();
-        String date_birth = scanner.nextLine().trim();
-        try {
-            LocalDate.parse(date_birth);
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in YYYY-MM-DD format.");
-            return;
-        }
+        System.out.println("YYYY-MM-DD");
+        java.sql.Date date_birth = java.sql.Date.valueOf(scanner.next());
 
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = null;
         String query = "UPDATE person\n" +
                 "SET person.date_birth=?\n" +
                 "WHERE person.person_id=(\n" +
@@ -408,7 +369,7 @@ public class StaffMenu {
                 "FROM coach \n" +
                 "WHERE coach_id=?);\n";
         ps = conn.prepareStatement(query);
-        ps.setDate(1, java.sql.Date.valueOf(date_birth));
+        ps.setDate(1, date_birth);
         ps.setInt(2, coach_id);
         try
         {
@@ -425,21 +386,16 @@ public class StaffMenu {
         }
     }
 
-    private void editPhone(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
-        System.out.println("Please enter the coach ID you want to edit: ");
+    private void editPhone(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter the new phone number: ");
+        System.out.println("Phone");
         scanner.nextLine();
         String phone = scanner.nextLine();
-        if (!phone.matches("\\d{10}")) {
-            System.out.println("Error: Invalid phone number. Please enter a 10-digit number.");
-            return;
-        }
 
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = null;
         String query = "UPDATE person\n" +
                 "SET person.phone=?\n" +
                 "WHERE person.person_id=(\n" +
@@ -464,20 +420,15 @@ public class StaffMenu {
         }
     }
 
-    private void editClassroom(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
-        System.out.println("Please enter the coach ID you want to edit: ");
+    private void editClassroom(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter whether the coach is Classroom Certified or not (0 or 1): ");
+        System.out.println("Classroom Certified");
         int classroom_certified = scanner.nextInt();
-        if (classroom_certified != 0 && classroom_certified != 1) {
-            System.out.println("Error: Invalid input. Please enter either 0 or 1.");
-            return;
-        }
 
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = null;
         String query = "UPDATE coach\n" +
                 "SET coach.classroom_certified=?\n" +
                 "WHERE coach_id=?;\n";
@@ -499,20 +450,15 @@ public class StaffMenu {
         }
     }
 
-    private void editDirtBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
-        System.out.println("Please enter the coach ID you want to edit: ");
+    private void editDirtBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please enter whether the coach is Dirt Bike Certified or not (0 or 1): ");
+        System.out.println("Dirt Bike Certified");
         int dirtbike_certified = scanner.nextInt();
-        if (dirtbike_certified != 0 && dirtbike_certified != 1) {
-            System.out.println("Error: Invalid input. Please enter either 0 or 1.");
-            return;
-        }
 
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = null;
         String query = "UPDATE coach\n" +
                 "SET coach.dirtbike_certified=?\n" +
                 "WHERE coach_id=?;\n";
@@ -534,19 +480,15 @@ public class StaffMenu {
         }
     }
 
-    private void editStreetBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException {
-        System.out.println("Please enter the coach ID you want to edit: ");
+    private void editStreetBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Coach Id");
         int coach_id = scanner.nextInt();
 
-        System.out.println("Please ender whether the coach is Street Bike Certified or not (0 or 1):");
+        System.out.println("Street Bike Certified");
         int streetbike_certified = scanner.nextInt();
-        if (streetbike_certified != 0 && streetbike_certified != 1) {
-            System.out.println("Error: Invalid input. Please enter either 0 or 1.");
-            return;
-        }
+
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = null;
         String query = "UPDATE coach\n" +
                 "SET coach.streetbike_certified=?\n" +
                 "WHERE coach_id=?;\n";
@@ -568,75 +510,46 @@ public class StaffMenu {
         }
     }
 
-    private void createCoach(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) throws SQLException{
-        System.out.println("Please enter the coach's full name (max 30 characters): ");
+    private void createCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException{
+        System.out.println("Name");
         scanner.nextLine();
-        String full_name = scanner.nextLine().trim();
-        if (full_name.length() > 30) {
-            System.out.println("Error: Full name exceeds maximum length of 30 characters.");
-            return;
-        }
+        String full_name = scanner.nextLine();
 
-        System.out.println("Please enter the coach's address (max 50 characters): ");
-        String address = scanner.nextLine().trim();
-        if (address.length() > 50) {
-            System.out.println("Error: Address exceeds maximum length of 50 characters.");
-            return;
-        }
+        System.out.println("adress");
+        String address = scanner.nextLine();
 
-        System.out.println("Please enter the coach's date of birth (YYYY-MM-DD): ");
-        String date_birth = scanner.nextLine().trim();
-        try {
-            LocalDate.parse(date_birth);
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in YYYY-MM-DD format.");
-            return;
-        }
+        System.out.println("YYYY-MM-DD");
+        String birthDate  = scanner.next();
+        java.sql.Date sqlDate = java.sql.Date.valueOf(birthDate);
 
-        System.out.println("Please enter the coach's phone number (10 digits): ");
-        String phone = scanner.nextLine().trim();
-        if (!phone.matches("\\d{10}")) {
-            System.out.println("Error: Invalid phone number. Please enter a 10-digit number.");
-            return;
-        }
+        System.out.println("Phone");
+        String phone = scanner.next();
 
-        System.out.println("Is the coach certified to teach in the classroom? (0 for no, 1 for yes)");
+        System.out.println("classroom_certified");
         int classroom_certified = scanner.nextInt();
-        if (classroom_certified != 0 && classroom_certified != 1) {
-            System.out.println("Error: Invalid input. Please enter either 0 or 1.");
-            return;
-        }
 
-        System.out.println("Is the coach certified to teach dirtbike riding? (0 for no, 1 for yes)");
+        System.out.println("dirtbike_certified");
         int dirtbike_certified = scanner.nextInt();
-        if (dirtbike_certified != 0 && dirtbike_certified != 1) {
-            System.out.println("Error: Invalid input. Please enter either 0 or 1.");
-            return;
-        }
 
-        System.out.println("Is the coach certified to teach streetbike riding? (0 for no, 1 for yes)");
+        System.out.println("streetbike_certified");
         int streetbike_certified = scanner.nextInt();
-        if (streetbike_certified != 0 && streetbike_certified != 1) {
-            System.out.println("Error: Invalid input. Please enter either 0 or 1.");
-            return;
-        }
 
         String query1 = "INSERT INTO person (full_name, address, date_birth, phone) VALUES (?, ?, ?, ?);";
         String query2 = "INSERT INTO coach (person_id, classroom_certified, dirtbike_certified, streetbike_certified)\n" +
                 "VALUES ((SELECT person_id FROM person WHERE full_name=? AND address=? AND date_birth=? AND phone= ?), ?, ?, ?);";
-        PreparedStatement ps = null;
+        
         conn.setAutoCommit(false);
         ps = conn.prepareStatement(query1);
         ps.setString(1, full_name);
         ps.setString(2, address);
-        ps.setDate(3, java.sql.Date.valueOf(date_birth));
+        ps.setDate(3, sqlDate);
         ps.setString(4, phone);
 
         PreparedStatement ps1 = null;
         ps1 = conn.prepareStatement(query2);
         ps1.setString(1, full_name);
         ps1.setString(2, address);
-        ps1.setDate(3, java.sql.Date.valueOf(date_birth));
+        ps1.setDate(3, sqlDate);
         ps1.setString(4, phone);
         ps1.setInt(5, classroom_certified);
         ps1.setInt(6, dirtbike_certified);
@@ -644,11 +557,11 @@ public class StaffMenu {
         try {
             if (ps.executeUpdate() > 0 && ps1.executeUpdate() > 0) {
                 conn.commit();
-                System.out.println("Coach " + full_name + " has been added to the database.");
+                System.out.println("SUCCESS");
             }
         } catch (SQLException e) {
             conn.rollback();
-            System.err.println("Error creating coach: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
