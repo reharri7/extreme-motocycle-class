@@ -12,74 +12,42 @@ public class GarageMenu {
 
     /**
      * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
-     * @throws SQLException
      */
-    public void menu(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    public void menu(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         int selection;
 
         while (true) {
             printMenu();
             try {
-                selection = scanner.nextInt();
+                selection = Integer.parseInt(scanner.nextLine());
                 switch (selection) {
-                    case 1:
-                        createBike(rs, ps, conn, scanner);
-                        break;
-                    case 2:
-                        viewBike(rs, ps, conn, scanner);
-                        break;
-                    case 3:
-                        editBike(rs, ps, conn, scanner);
-                        break;
-                    case 4:
-                        deleteBike(rs, ps, conn, scanner);
-                        break;
-                    case 5:
-                        assignBike(rs, ps, conn, scanner);
-                        break;
-                    case 6:
-                        unassignBike(rs, ps, conn, scanner);
-                        break;
-                    case 7:
-                        bikeProblemReport(rs, ps, conn, scanner);
-                        break;
-                    case 8:
-                        bikeAssignmentReport(rs, ps, conn, scanner);
-                        break;
-                    case 9:
-                        createBikeProblem(rs, ps, conn, scanner);
-                        break;
-                    case 10:
-                        viewBikeProblem(rs, ps, conn, scanner);
-                        break;
-                    case 11:
-                        editBikeProblem(rs, ps, conn, scanner);
-                        break;
-                    case 12:
-                        deleteBikeProblem(rs, ps, conn, scanner);
-                        break;
-                    case 13:
-                        createBikeType(rs, ps, conn, scanner);
-                        break;
-                    case 14:
-                        viewBikeTypes(rs, ps, conn, scanner);
-                        break;
-                    case 15:
-                        editBikeType(rs, ps, conn, scanner);
-                        break;
-                    case 16:
-                        deleteBikeType(rs, ps, conn, scanner);
-                        break;
-                    case 0:
+                    case 1 -> createBike(ps, conn, scanner);
+                    case 2 -> viewBike(rs, conn);
+                    case 3 -> editBike(ps, conn, scanner);
+                    case 4 -> deleteBike(ps, conn, scanner);
+                    case 5 -> assignBike(ps, conn, scanner);
+                    case 6 -> unassignBike(ps, conn, scanner);
+                    case 7 -> bikeProblemReport(rs, ps, conn, scanner);
+                    case 8 -> bikeAssignmentReport(rs, ps, conn, scanner);
+                    case 9 -> createBikeProblem(ps, conn, scanner);
+                    case 10 -> viewBikeProblem(rs, ps, conn);
+                    case 11 -> editBikeProblem(ps, conn, scanner);
+                    case 12 -> deleteBikeProblem(ps, conn, scanner);
+                    case 13 -> createBikeType(ps, conn, scanner);
+                    case 14 -> viewBikeTypes(rs, ps, conn);
+                    case 15 -> editBikeType(ps, conn, scanner);
+                    case 16 -> deleteBikeType(ps, conn, scanner);
+                    case 0 -> {
                         return;
+                    }
                 }
 
-            } catch (InputMismatchException ex) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Please enter an integer value between 0 and 16" );
-                scanner.next();
+                scanner.nextLine();
             }
         }
     }
@@ -107,14 +75,13 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void deleteBikeType(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void deleteBikeType(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
-        int bikeTypeID = scanner.nextInt();
+        int bikeTypeID = Integer.parseInt(scanner.nextLine());
 
         String query = "DELETE FROM bike_type WHERE bike_type_id=?";
         try {
@@ -137,20 +104,19 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void editBikeType(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void editBikeType(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike type's ID: ");
-        int bikeTypeID = scanner.nextInt();
+        int bikeTypeID = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the attribute you wish to change: ");
-        String attribute = scanner.next();
+        String attribute = scanner.nextLine();
 
         System.out.println("Please enter the new value for the attribute: ");
-        String newValue = scanner.next();
+        String newValue = scanner.nextLine();
 
         /* Make a switch case to determine whether to cast the input to another type */
         String[] validAttributes = {"bike_type_id", "bike_type_value"};
@@ -191,11 +157,10 @@ public class GarageMenu {
 
     /**
      * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
-     * @param scanner
      */
-    private void viewBikeTypes(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void viewBikeTypes(ResultSet rs, PreparedStatement ps, Connection conn) {
         System.out.println("Here are all the bike types registered:");
         String query = "SELECT * FROM bike_type";
         try {
@@ -219,14 +184,13 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void createBikeType(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void createBikeType(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a name for the bike type between 1 and 10 characters: ");
-        String bikeTypeName = scanner.next();
+        String bikeTypeName = scanner.nextLine();
 
         String query = "INSERT INTO bike_type (bike_type_value) VALUES (?)";
         try {
@@ -249,14 +213,13 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void deleteBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void deleteBikeProblem(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the problem ID: ");
-        int problemID = scanner.nextInt();
+        int problemID = Integer.parseInt(scanner.nextLine());
 
         String query = "DELETE FROM problem WHERE problem_id=?";
         try {
@@ -279,20 +242,19 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void editBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void editBikeProblem(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the attribute you wish to change: ");
-        String attribute = scanner.next();
+        String attribute = scanner.nextLine();
 
         System.out.println("Please enter the new value for the attribute: ");
-        String newValue = "";
+        String newValue;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try {
             newValue = br.readLine();
@@ -342,11 +304,10 @@ public class GarageMenu {
 
     /**
      * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
-     * @param scanner
      */
-    private void viewBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void viewBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn) {
         String query = "SELECT * FROM problem";
         try {
             ps = conn.prepareStatement(query);
@@ -369,17 +330,16 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void createBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void createBikeProblem(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
-        System.out.println("Please enter a date the problem occured (yyyy-mm-dd): ");
-        String date = scanner.next();
+        System.out.println("Please enter a date the problem occurred (yyyy-mm-dd): ");
+        String date = scanner.nextLine();
 
         System.out.println("Please enter a description of the problem between 1 and 150 characters: ");
         String description = "";
@@ -392,10 +352,10 @@ public class GarageMenu {
         }
 
         System.out.println("Please enter a date to specify the repair date (yyyy-mm-dd): ");
-        String repairDate = scanner.next();
+        String repairDate = scanner.nextLine();
 
         System.out.println("Please enter a number for the cost of repair: ");
-        int cost = scanner.nextInt();
+        int cost = Integer.parseInt(scanner.nextLine());
 
         String query = "INSERT INTO problem (problem_date, bike_id, repair_date, description, cost) VALUES (?, ?, ?, ?, ?)";
         try {
@@ -406,7 +366,7 @@ public class GarageMenu {
             ps.setString(4, description);
             ps.setInt(5, cost);
             ps.executeUpdate();
-            System.out.println("Sucessfully created bike problem");
+            System.out.println("Successfully created bike problem");
         }
         catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid date and did not exceed the character limit for the description.");
@@ -426,13 +386,13 @@ public class GarageMenu {
 
     /**
      * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
     private void bikeAssignmentReport(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bikes ID: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
         String query = "SELECT course_schedule.course_date,course.course_name "
                 + "FROM bike_assignment,course_schedule,course "
@@ -464,13 +424,13 @@ public class GarageMenu {
 
     /**
      * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
     private void bikeProblemReport(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
         String query = "SELECT problem_date,repair_date,description,cost FROM problem WHERE bike_id=?";
         
@@ -497,21 +457,20 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void unassignBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void unassignBike(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike assignment ID: ");
-        int bikeAssignmentID = scanner.nextInt();
+        int bikeAssignmentID = Integer.parseInt(scanner.nextLine());
 
         String query = "DELETE FROM bike_assignment WHERE bike_assignment_id = ?";
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeAssignmentID);
             ps.executeUpdate();
-            System.out.println("Sucessfully unassigned the bike assignment: " + bikeAssignmentID);
+            System.out.println("Successfully unassigned the bike assignment: " + bikeAssignmentID);
         } catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid bike assignment ID.");
         } finally {
@@ -528,17 +487,16 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void assignBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void assignBike(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please a number for the course schedule's ID: ");
-        int courseScheduleID = scanner.nextInt();
+        int courseScheduleID = Integer.parseInt(scanner.nextLine());
 
         String query = "INSERT INTO bike_assignment (course_schedule_id, bike_id) VALUES (?, ?)";
 
@@ -547,7 +505,7 @@ public class GarageMenu {
             ps.setInt(1, courseScheduleID);
             ps.setInt(2, bikeID);
             ps.executeUpdate();
-            System.out.println("Sucessfully assigned bike " + bikeID + " to course schedule " + courseScheduleID);
+            System.out.println("Successfully assigned bike " + bikeID + " to course schedule " + courseScheduleID);
         } catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid bike ID and course schedule ID.");
         } finally {
@@ -564,14 +522,13 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void deleteBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void deleteBike(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to delete: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
         // Delete from bike
         String query = "DELETE FROM bike WHERE bike_id=?";
@@ -579,7 +536,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
             ps.executeUpdate();
-            System.out.println("Sucessfully deleted bike: " + bikeID);
+            System.out.println("Successfully deleted bike: " + bikeID);
         } catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         } finally {
@@ -598,7 +555,7 @@ public class GarageMenu {
             ps = conn.prepareStatement(query);
             ps.setInt(1, bikeID);
             ps.executeUpdate();
-            System.out.println("Sucessfully deleted assignments for bike: " + bikeID);
+            System.out.println("Successfully deleted assignments for bike: " + bikeID);
         } catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid bike ID.");
         } finally {
@@ -614,20 +571,19 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void editBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void editBike(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Please enter a number for the bike's ID you wish to edit: ");
-        int bikeID = scanner.nextInt();
+        int bikeID = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the attribute you wish to edit: ");
-        String attribute = scanner.next();
+        String attribute = scanner.nextLine();
 
         System.out.println("Please enter the new value for the attribute: ");
-        String newValue = scanner.next();
+        String newValue = scanner.nextLine();
 
         /* Make a switch case to determine whether to cast the input to another type */
         String[] validAttributes = {"bike_id", "brand", "type", "license_plate", "vin", "cc", "broken"};
@@ -635,6 +591,7 @@ public class GarageMenu {
         for (String s : validAttributes) {
             if (s.equals(attribute)) {
                 validAttribute = true;
+                break;
             }
         }
 
@@ -644,13 +601,13 @@ public class GarageMenu {
         }
 
         String query = "UPDATE bike SET " + attribute + "=? WHERE bike_id=?";
-        PreparedStatement ps = null;
+        ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, newValue);
             ps.setInt(2, bikeID);
             ps.executeUpdate();
-            System.out.println("Sucessfully updated bike " + bikeID + " with new value " + newValue);
+            System.out.println("Successfully updated bike " + bikeID + " with new value " + newValue);
         }
         catch (SQLException e) {
             System.out.println("We were unable to update the bike. Are you sure the bike exists?");
@@ -669,15 +626,13 @@ public class GarageMenu {
 
     /**
      * @param rs
-     * @param stmt
      * @param conn
-     * @param scanner
      */
-    private void viewBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void viewBike(ResultSet rs, Connection conn) {
         System.out.println("Here are all the bikes registered: ");
         String query = "SELECT bike_id, brand, cc, broken FROM bike";
         try {
-            stmt = conn.createStatement();
+            Statement stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
         } catch (SQLException e) {
             System.out.println("Query failed. Try again.");
@@ -689,33 +644,32 @@ public class GarageMenu {
 
 
     /**
-     * @param rs
-     * @param stmt
+     * @param ps
      * @param conn
      * @param scanner
      */
-    private void createBike(ResultSet rs, Statement stmt, Connection conn, Scanner scanner) {
+    private void createBike(PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("Enter the bike's brand between 1-30 characters: ");
-        String brand = scanner.next();
+        String brand = scanner.nextLine();
 
         System.out.println("Please enter a number for bike type: ");
-        int bikeType = scanner.nextInt();
+        int bikeType = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the license plate between 1-30 characters: ");
-        String licensePlate = scanner.next();
+        String licensePlate = scanner.nextLine();
 
         System.out.println("Please enter the bike's VIN between 1-30 characters: ");
-        String vin = scanner.next();
+        String vin = scanner.nextLine();
 
         System.out.println("Please enter a number to specify if the bike is broken: ");
-        int broken = scanner.nextInt();
+        int broken = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter a number to specify the bike's CCs: ");
-        int cc = scanner.nextInt();
+        int cc = Integer.parseInt(scanner.nextLine());
 
         // Build the query and use PreparedStatements to insert the data
         String query = "INSERT INTO bike (brand, type, license_plate, vin, broken, cc) VALUES (?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = null;
+        ps = null;
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, brand);

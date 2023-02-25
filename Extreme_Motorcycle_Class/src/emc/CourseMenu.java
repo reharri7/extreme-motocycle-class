@@ -26,31 +26,33 @@ public class CourseMenu {
         while(true) {
             printMenu();
             try {
-                selection = scanner.nextInt();
-                switch (selection){
-                    case 1: createCourse(rs, stmt, conn, scanner); break;
-                    case 2: editCourse(rs, stmt, conn, scanner); break;
-                    case 3: viewCourse(rs, stmt, conn, scanner); break;
-                    case 4: deleteCourse(rs, stmt, conn, scanner); break;
-                    case 5: courseReport(rs, stmt, conn, scanner); break;
-                    case 6: weeklyCourseReport(rs, stmt, conn, scanner); break;
-                    case 7: createCourseType(rs, stmt, conn, scanner); break;
-                    case 8: editCourseType(rs, stmt, conn, scanner); break;
-                    case 9: viewCourseType(rs, stmt, conn, scanner); break;
-                    case 10: deleteCourseType(rs, stmt, conn, scanner); break;
-                    case 0: return;
+                selection = Integer.parseInt(scanner.nextLine());
+                switch (selection) {
+                    case 1 -> createCourse(rs, stmt, conn, scanner);
+                    case 2 -> editCourse(rs, stmt, conn, scanner);
+                    case 3 -> viewCourse(rs, stmt, conn, scanner);
+                    case 4 -> deleteCourse(rs, stmt, conn, scanner);
+                    case 5 -> courseReport(rs, stmt, conn, scanner);
+                    case 6 -> weeklyCourseReport(rs, stmt, conn, scanner);
+                    case 7 -> createCourseType(rs, stmt, conn, scanner);
+                    case 8 -> editCourseType(rs, stmt, conn, scanner);
+                    case 9 -> viewCourseType(rs, stmt, conn, scanner);
+                    case 10 -> deleteCourseType(rs, stmt, conn, scanner);
+                    case 0 -> {
+                        return;
+                    }
                 }
 
-            }catch (InputMismatchException ex){
+            }catch (InputMismatchException | NumberFormatException ex){
                 System.out.println("Please enter an integer value between 0 and 10" );
-                scanner.next();
+                scanner.nextLine();
             }
         }
     }
 
 
     /**
-     * This method asks the user for the course attributes, then sends the create statement to the
+     * This method asks the user for the course attributes, then sends the creation statement to the
      * database.
      *
      * @param rs
@@ -62,19 +64,19 @@ public class CourseMenu {
                               Scanner scanner) {
 
         System.out.println("Please enter a course name between 1-30 characters");
-        String course_name = scanner.next();
+        String course_name = scanner.nextLine();
 
         System.out.println("Please enter a number for course type id");
-        int course_type = scanner.nextInt();
+        int course_type = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter a number for the capacity");
-        int capacity = scanner.nextInt();
+        int capacity = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the course description between 1-150 characters");
-        String description = scanner.next();
+        String description = scanner.nextLine();
 
         System.out.println("Please enter a number for the cost");
-        int cost = scanner.nextInt();
+        int cost = Integer.parseInt(scanner.nextLine());
 
         try {
             stmt = conn.prepareStatement("INSERT INTO `course` "
@@ -89,22 +91,21 @@ public class CourseMenu {
             stmt.execute();
             checkCourse(rs, stmt, conn, course_name, course_type, capacity, description, cost);
         } catch(SQLException e) {
-            printCreateCourseError(e.getMessage(), rs, stmt, conn, scanner);
+            printCreateCourseError(e.getMessage(), rs, stmt, conn);
         }
 
     }
 
     /**
-     * This method prints human readable error statements from the create course method.
+     * This method prints human-readable error statements from the create course method.
      *
      * @param e
      * @param rs
      * @param stmt
      * @param conn
-     * @param scanner
      */
     private void printCreateCourseError(String e, ResultSet rs, PreparedStatement stmt,
-                                        Connection conn, Scanner scanner) {
+                                        Connection conn) {
         System.out.println(e);
         System.out.println("Could not add course");
         if(e.contains("Data truncation: Data too long for column 'course_name'")) {
@@ -158,7 +159,7 @@ public class CourseMenu {
                 } else {
                     System.out.print("Unable to complete request, please try again");
                 }
-                System.out.println("");
+                System.out.println();
             }
         } catch(SQLException e) {
             System.out.println(e);
@@ -166,7 +167,7 @@ public class CourseMenu {
     }
 
     /**
-     * This course gets the course id, attribue name and new attribute, then sends an edit statement
+     * This course gets the course id, attribute name and new attribute, then sends an edit statement
      * to the database.
      *
      * @param rs
@@ -177,17 +178,17 @@ public class CourseMenu {
     private void editCourse(ResultSet rs, PreparedStatement stmt, Connection conn,
                             Scanner scanner) {
         System.out.println("Please enter a number for the course id");
-        int course_id = scanner.nextInt();
+        int course_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the attribute to change");
-        String attribute_name = scanner.next();
+        String attribute_name = scanner.nextLine();
 
         try {
             if(attribute_name.matches("course_name")
                     || attribute_name.matches("course_description")){
 
                 System.out.println("Please enter the new value");
-                String new_value = scanner.next();
+                String new_value = scanner.nextLine();
 
                 stmt = conn.prepareStatement("UPDATE course SET course."+ attribute_name
                         + "= ? WHERE course_id = ? ");
@@ -200,7 +201,7 @@ public class CourseMenu {
             } else if(attribute_name.matches("capacity") || attribute_name.matches("cost") ||
                     attribute_name.matches("course_type")) {
                 System.out.println("Please enter the new value");
-                int new_value = scanner.nextInt();
+                int new_value = Integer.parseInt(scanner.nextLine());
 
                 stmt = conn.prepareStatement("UPDATE course SET course." + attribute_name
                         + " = ? WHERE course_id = ? ");
@@ -213,7 +214,6 @@ public class CourseMenu {
                         Integer.toString(new_value));
             } else {
                 System.out.println("That is not a valid attribute for course");
-                return;
             }
 
         } catch(SQLException e) {
@@ -283,7 +283,7 @@ public class CourseMenu {
                 } else {
                     System.out.print("Unable to complete request, please try again");
                 }
-                System.out.println("");
+                System.out.println();
             }
             if(!found) {
                 System.out.println("No Course with that ID. Please select from:");
@@ -305,7 +305,7 @@ public class CourseMenu {
     private void viewCourse(ResultSet rs, PreparedStatement stmt, Connection conn,
                             Scanner scanner) {
         System.out.println("Please enter a number for the course id");
-        int course_id = scanner.nextInt();
+        int course_id = Integer.parseInt(scanner.nextLine());
         boolean found = false;
         try {
             stmt = conn.prepareStatement("SELECT * FROM course WHERE course_id = ?");
@@ -324,7 +324,7 @@ public class CourseMenu {
                 int numColumns = metaData.getColumnCount();
                 printCourseColumn(rs, stmt, conn);
                 //print results
-                Object obj = null;
+                Object obj;
                 while (rs.next()) {
                     found = true;
                     for (int i = 1; i <= numColumns; i++) {
@@ -338,7 +338,6 @@ public class CourseMenu {
                 if(!found) {
                     System.out.println("No course exists with that ID. Please select from: ");
                     viewAllCourses(rs, stmt, conn);
-                    return;
                 }
             }
         } catch(SQLException e) {
@@ -369,7 +368,7 @@ public class CourseMenu {
                 int numColumns = metaData.getColumnCount();
                 printCourseColumn(rs, stmt, conn);
                 //print results
-                Object obj = null;
+                Object obj;
                 while (rs.next()) {
                     for (int i = 1; i <= numColumns; i++) {
                         obj = rs.getObject(i);
@@ -397,7 +396,7 @@ public class CourseMenu {
                 row[3],
                 row[4],
                 row[5]);
-        System.out.println("");
+        System.out.println();
     }
 
     /**
@@ -413,7 +412,7 @@ public class CourseMenu {
 
         try {
             System.out.println("Please enter a number for the course id");
-            int course_id = scanner.nextInt();
+            int course_id = Integer.parseInt(scanner.nextLine());
 
             stmt = conn.prepareStatement("DELETE FROM course WHERE course_id = ?");
             stmt.setInt(1, course_id);
@@ -446,7 +445,7 @@ public class CourseMenu {
             } else {
                 System.out.print("Unable to complete request, please try again");
             }
-            System.out.println("");
+            System.out.println();
         } catch (SQLException e){
             e.printStackTrace();
         }
@@ -467,7 +466,7 @@ public class CourseMenu {
         boolean found = false;
 
         System.out.println("Please enter a number for the course id");
-        int course_id = scanner.nextInt();
+        int course_id = Integer.parseInt(scanner.nextLine());
 
         try {
             stmt = conn.prepareStatement("SELECT "
@@ -509,7 +508,6 @@ public class CourseMenu {
             if(!found) {
                 System.out.println("No course with that id. Please choose from:");
                 viewAllCourses(rs, stmt, conn);
-                return;
             }
         } catch (SQLException e){
             e.printStackTrace();
@@ -536,7 +534,7 @@ public class CourseMenu {
         while(!correctInput) {
             System.out.println("Please enter a year in the format yyyy"
                     + " or 0 to go back to CourseMenu");
-            year = scanner.nextInt();
+            year = Integer.parseInt(scanner.nextLine());
             if(year < 10000 && year > 999) {
                 correctInput = true;
             }
@@ -550,7 +548,7 @@ public class CourseMenu {
         while(!correctInput) {
             System.out.println("Please enter a number for the month"
                     + " or 0 to go back to CourseMenu");
-            month = scanner.nextInt();
+            month = Integer.parseInt(scanner.nextLine());
             if(month < 13 && month > 0) {
                 correctInput = true;
             }
@@ -564,7 +562,7 @@ public class CourseMenu {
         while(!correctInput) {
             System.out.println("Please enter a number for the day"
                     + " or 0 to go back to CourseMenu");
-            day = scanner.nextInt();
+            day = Integer.parseInt(scanner.nextLine());
             if(day <= getDayMax(month, year) && day > 0) {
                 correctInput = true;
             }
@@ -635,7 +633,7 @@ public class CourseMenu {
                     }
                 }
 
-                Object obj = null;
+                Object obj;
                 while (rs.next()) {
                     for (int i = 1; i <= numColumns; i++) {
                         obj = rs.getObject(i);
@@ -692,17 +690,17 @@ public class CourseMenu {
      * @return
      */
     private String convertDateToString(int year, int month, int day) {
-        String date = Integer.toString(year)+ "-";
+        String date = year + "-";
         if(month < 10) {
-            date = date + "0" + Integer.toString(month)+ "-";
+            date = date + "0" + month + "-";
         }else {
-            date = date + Integer.toString(month) + "-";
+            date = date + month + "-";
         }
 
         if(day < 10) {
-            date = date + "0" + Integer.toString(day);
+            date = date + "0" + day;
         }else {
-            date = date + Integer.toString(day);
+            date = date + day;
         }
         return date;
     }
@@ -749,7 +747,7 @@ public class CourseMenu {
     private void createCourseType(ResultSet rs, PreparedStatement stmt, Connection conn,
                                   Scanner scanner) {
         System.out.println("Please enter a course type value between 1-30 characters");
-        String course_type_value = scanner.next();
+        String course_type_value = scanner.nextLine();
 
         try {
             stmt = conn.prepareStatement("INSERT INTO `course_type` "
@@ -792,7 +790,7 @@ public class CourseMenu {
                 } else {
                     System.out.print("Unable to complete request, please try again");
                 }
-                System.out.println("");
+                System.out.println();
             }
         } catch(SQLException e) {
             e.printStackTrace();
@@ -800,7 +798,7 @@ public class CourseMenu {
     }
 
     /**
-     * This method asks the user for a course type id and a coure type value then updates that
+     * This method asks the user for a course type id and a core type value then updates that
      * course type with the new course type value
      *
      * @param rs
@@ -812,10 +810,10 @@ public class CourseMenu {
                                 Scanner scanner) {
         try {
             System.out.println("Please enter a number for the course_type_id");
-            int course_type_id = scanner.nextInt();
+            int course_type_id = Integer.parseInt(scanner.nextLine());
 
             System.out.println("Please enter the new value for course_type_value");
-            String new_value = scanner.next();
+            String new_value = scanner.nextLine();
 
             stmt = conn.prepareStatement("UPDATE course_type SET course_type.course_type_value = ? "
                     + "WHERE course_type_id = ? ");
@@ -858,7 +856,7 @@ public class CourseMenu {
                 } else {
                     System.out.print("Unable to complete request, please try again");
                 }
-                System.out.println("");
+                System.out.println();
             }
 
             if(!found) {
@@ -881,7 +879,7 @@ public class CourseMenu {
     private void viewCourseType(ResultSet rs, PreparedStatement stmt, Connection conn,
                                 Scanner scanner) {
         System.out.println("Please enter a number for the course_type_id");
-        int course_type_id = scanner.nextInt();
+        int course_type_id = Integer.parseInt(scanner.nextLine());
         boolean found = false;
         boolean header = true;
         try {
@@ -896,7 +894,7 @@ public class CourseMenu {
 
             if(rs != null) {
                 //print results
-                Object obj = null;
+                Object obj;
                 while (rs.next()) {
                     found = true;
                     if(header) {
@@ -962,7 +960,7 @@ public class CourseMenu {
                 printCourseTypeRow(row);
                 System.out.print("-----------------------------------------------\n");
                 //print results
-                Object obj = null;
+                Object obj;
                 while (rs.next()) {
                     for (int i = 1; i <= numColumns; i++) {
                         obj = rs.getObject(i);
@@ -988,7 +986,7 @@ public class CourseMenu {
         System.out.printf("|%-14s|%-30s|",
                 row[0],
                 row[1]);
-        System.out.println("");
+        System.out.println();
     }
 
     /**
@@ -1001,7 +999,7 @@ public class CourseMenu {
     private void deleteCourseType(ResultSet rs, PreparedStatement stmt, Connection conn,
                                   Scanner scanner)  {
         System.out.println("Please enter a number for the course_type_id");
-        int course_type_id = scanner.nextInt();
+        int course_type_id = Integer.parseInt(scanner.nextLine());
 
         try {
             stmt = conn.prepareStatement("DELETE FROM course_type WHERE course_type_id = ?");
@@ -1037,7 +1035,7 @@ public class CourseMenu {
             } else {
                 System.out.print("Unable to complete request, please try again");
             }
-            System.out.println("");
+            System.out.println();
         } catch(SQLException e) {
             e.printStackTrace();
         }

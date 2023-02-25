@@ -10,7 +10,6 @@ package emc;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -22,35 +21,22 @@ public class StaffMenu {
         while(true) {
             printStaffMenu();
             try {
-                choice = scanner.nextInt();
+                choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
-                    case 1:
-                        createCoach(rs, ps, conn, scanner);
-                        break;
-                    case 2:
-                        viewCoach(rs, ps, conn, scanner);
-                        break;
-                    case 3:
-                        editCoach(rs, ps, conn, scanner);
-                        break;
-                    case 4:
-                        deleteCoach(rs, ps, conn, scanner);
-                        break;
-                    case 5:
-                        assignCoach(rs, ps, conn, scanner);
-                        break;
-                    case 6:
-                        unassignCoach(rs, ps, conn, scanner);
-                        break;
-                    case 7:
-                        viewCoachSchedule(rs, ps, conn, scanner);
-                        break;
-                    case 0:
+                    case 1 -> createCoach(ps, conn, scanner);
+                    case 2 -> viewCoach(rs, ps);
+                    case 3 -> editCoach(ps, conn, scanner);
+                    case 4 -> deleteCoach(ps, conn, scanner);
+                    case 5 -> assignCoach(ps, conn, scanner);
+                    case 6 -> unassignCoach(ps, conn, scanner);
+                    case 7 -> viewCoachSchedule(rs, ps, conn, scanner);
+                    case 0 -> {
                         return;
+                    }
                 }
-            } catch (InputMismatchException e) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Please enter an integer value between 0 and 7");
-                scanner.next();
+                scanner.nextLine();
             }
         }
 
@@ -86,11 +72,13 @@ public class StaffMenu {
         System.out.println("0. Coach Menu");
     }
 
-    private void viewCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void viewCoach(ResultSet rs, PreparedStatement ps) {
         System.out.println(": ");
-        String query = "SELECT coach.coach_id,person.full_name\n" +
-                "FROM coach,person \n" +
-                "WHERE coach.person_id=person.person_id;\n";
+        String query = """
+                SELECT coach.coach_id,person.full_name
+                FROM coach,person\s
+                WHERE coach.person_id=person.person_id;
+                """;
         try {
             rs = ps.executeQuery(query);
         } catch (SQLException e) {
@@ -106,20 +94,17 @@ public class StaffMenu {
         while(true) {
             printSchedulesMenu();
             try {
-                choice = scanner.nextInt();
+                choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
-                    case 1:
-                        coachWeeklySchedule(rs, ps, conn, scanner);
-                        break;
-                    case 2:
-                        coachAvailabilitySchedule(rs, ps, conn, scanner);
-                        break;
-                    case 0:
+                    case 1 -> coachWeeklySchedule(rs, ps, conn, scanner);
+                    case 2 -> coachAvailabilitySchedule(rs, ps, conn, scanner);
+                    case 0 -> {
                         return;
+                    }
                 }
-            } catch (InputMismatchException e) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Please enter an integer value between 0 and 2");
-                scanner.next();
+                scanner.nextLine();
             }
         }
     }
@@ -132,18 +117,20 @@ public class StaffMenu {
         System.out.println("Enter 'AM range' or 'PM range': ");
         String time_type = scanner.nextLine();
 
-        String query = "SELECT * FROM coach c WHERE c.coach_id NOT IN (SELECT DISTINCT c1.coach_id \n" +
-                "FROM coach c1, coach_assignment, course_schedule, time_type\n" +
-                "WHERE c1.coach_id = coach_assignment.coach_id\n" +
-                "AND coach_assignment.course_schedule_id = course_schedule.course_schedule_id\n" +
-                "AND course_schedule.time_type_id = time_type.time_type_id\n" +
-                "AND course_schedule.course_date = ? AND time_type.time_type_value= ?);\n";
+        String query = """
+                SELECT * FROM coach c WHERE c.coach_id NOT IN (SELECT DISTINCT c1.coach_id\s
+                FROM coach c1, coach_assignment, course_schedule, time_type
+                WHERE c1.coach_id = coach_assignment.coach_id
+                AND coach_assignment.course_schedule_id = course_schedule.course_schedule_id
+                AND course_schedule.time_type_id = time_type.time_type_id
+                AND course_schedule.course_date = ? AND time_type.time_type_value= ?);
+                """;
 
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, date);
             ps.setString(2, time_type);
-            System.out.println(ps.toString());
+            System.out.println(ps);
             rs = ps.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -154,24 +141,25 @@ public class StaffMenu {
 
     private void coachWeeklySchedule(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner){
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("YYYY-MM-DD");
-        java.sql.Date week_start_date = java.sql.Date.valueOf(scanner.next());
+        java.sql.Date week_start_date = java.sql.Date.valueOf(scanner.nextLine());
 
         //Calculate new date
         LocalDate newDate = week_start_date.toLocalDate().plusDays(7);
         java.sql.Date week_end_date = java.sql.Date.valueOf(newDate);
 
-        String query = "SELECT DISTINCT course.course_id,course.course_name,course_schedule.course_date,time_type.time_type_value \n" +
-                "FROM course,course_schedule,time_type,coach_assignment\n" +
-                "WHERE coach_assignment.coach_id=?\n" +
-                "AND coach_assignment.course_schedule_id = course_schedule.course_schedule_id\n" +
-                "AND course.course_id=course_schedule.course_id \n" +
-                "AND course_schedule.time_type_id=time_type.time_type_id \n" +
-                "AND course_schedule.course_date >= ? \n" +
-                "AND course_schedule.course_date < ? \n" +
-                "ORDER BY course_schedule.course_date;";
+        String query = """
+                SELECT DISTINCT course.course_id,course.course_name,course_schedule.course_date,time_type.time_type_value\s
+                FROM course,course_schedule,time_type,coach_assignment
+                WHERE coach_assignment.coach_id=?
+                AND coach_assignment.course_schedule_id = course_schedule.course_schedule_id
+                AND course.course_id=course_schedule.course_id\s
+                AND course_schedule.time_type_id=time_type.time_type_id\s
+                AND course_schedule.course_date >= ?\s
+                AND course_schedule.course_date < ?\s
+                ORDER BY course_schedule.course_date;""";
 
 
         try {
@@ -188,16 +176,18 @@ public class StaffMenu {
         Utils.printSet(rs);
     }
 
-    private void unassignCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void unassignCoach(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Enter Coach ID");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Enter Schedule ID: ");
-        int course_schedule_id = scanner.nextInt();
+        int course_schedule_id = Integer.parseInt(scanner.nextLine());
 
-        String query1 = "DELETE FROM coach_assignment \n" +
-                "WHERE coach_id=? \n" +
-                "AND course_schedule_id=?;\n";
+        String query1 = """
+                DELETE FROM coach_assignment\s
+                WHERE coach_id=?\s
+                AND course_schedule_id=?;
+                """;
 
         conn.setAutoCommit(false);
         ps = conn.prepareStatement(query1);
@@ -215,15 +205,15 @@ public class StaffMenu {
         }
     }
 
-    private void assignCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException{
+    private void assignCoach(PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException{
         System.out.println("Enter Schedule ID: ");
-        int course_schedule_id = scanner.nextInt();
+        int course_schedule_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Enter Coach ID");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Enter Assigned Role: ");
-        String assigned_role = scanner.next();
+        String assigned_role = scanner.nextLine();
 
         String query1 = "INSERT INTO coach_assignment (course_schedule_id, coach_id, assigned_role) VALUES (?, ?, ?);";
         conn.setAutoCommit(false);
@@ -243,15 +233,16 @@ public class StaffMenu {
         }
     }
 
-    private void deleteCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException{
+    private void deleteCoach(PreparedStatement ps, Connection conn, Scanner scanner) throws  SQLException{
         System.out.println("Enter Coach ID to Delete: ");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
-        String query1 = "DELETE FROM person \n" +
-                "WHERE person_id=(\n" +
-                "SELECT person_id \n" +
-                "FROM coach \n" +
-                "WHERE coach_id=?);";
+        String query1 = """
+                DELETE FROM person\s
+                WHERE person_id=(
+                SELECT person_id\s
+                FROM coach\s
+                WHERE coach_id=?);""";
         String query2 = "DELETE FROM coach_assignment WHERE coach_id=?;";
         String query3 = "DELETE FROM coach WHERE coach_id=?;";
 
@@ -259,59 +250,46 @@ public class StaffMenu {
         ps = conn.prepareStatement(query1);
         ps.setInt(1, coach_id);
 
-        PreparedStatement ps2 = null;
+        PreparedStatement ps2;
         ps2 = conn.prepareStatement(query2);
         ps2.setInt(1, coach_id);
 
-        PreparedStatement ps3 = null;
+        PreparedStatement ps3;
         ps3 = conn.prepareStatement(query3);
         ps3.setInt(1, coach_id);
 
         
         ps.executeUpdate();
         try {
-            if (true) {
-                conn.commit();
-                System.out.println("SUCCESS");
-            }
+            conn.commit();
+            System.out.println("SUCCESS");
         } catch (SQLException e) {
             conn.rollback();
             e.printStackTrace();
         }
     }
 
-    private void editCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
+    private void editCoach(PreparedStatement ps, Connection conn, Scanner scanner) {
         int choice;
 
         while(true) {
             printEditMenu();
             try {
-                choice = scanner.nextInt();
+                choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
-                    case 1:
-                        editAddress(rs, ps, conn, scanner);
-                        break;
-                    case 2:
-                        editDateBirth(rs, ps, conn, scanner);
-                        break;
-                    case 3:
-                        editPhone(rs, ps, conn, scanner);
-                        break;
-                    case 4:
-                        editClassroom(rs, ps, conn, scanner);
-                        break;
-                    case 5:
-                        editDirtBike(rs, ps, conn, scanner);
-                        break;
-                    case 6:
-                        editStreetBike(rs, ps, conn, scanner);
-                        break;
-                    case 0:
+                    case 1 -> editAddress(ps, conn, scanner);
+                    case 2 -> editDateBirth(ps, conn, scanner);
+                    case 3 -> editPhone(ps, conn, scanner);
+                    case 4 -> editClassroom(ps, conn, scanner);
+                    case 5 -> editDirtBike(ps, conn, scanner);
+                    case 6 -> editStreetBike(ps, conn, scanner);
+                    case 0 -> {
                         return;
+                    }
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Please enter an integer value between 0 and 6");
-                scanner.next();
+                scanner.nextLine();
             } catch (SQLException sqlException) {
                 sqlException.printStackTrace();
             }
@@ -319,9 +297,9 @@ public class StaffMenu {
 
     }
 
-    private void editAddress(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void editAddress(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Address");
         scanner.nextLine();
@@ -329,12 +307,14 @@ public class StaffMenu {
 
         conn.setAutoCommit(false);
 
-        String query = "UPDATE person\n" +
-                "SET person.address=?\n" +
-                "WHERE person.person_id=(\n" +
-                "SELECT DISTINCT person_id \n" +
-                "FROM coach \n" +
-                "WHERE coach_id=?);\n";
+        String query = """
+                UPDATE person
+                SET person.address=?
+                WHERE person.person_id=(
+                SELECT DISTINCT person_id\s
+                FROM coach\s
+                WHERE coach_id=?);
+                """;
         ps = conn.prepareStatement(query);
         ps.setString(1, address);
         ps.setInt(2, coach_id);
@@ -353,21 +333,23 @@ public class StaffMenu {
         }
     }
 
-    private void editDateBirth(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void editDateBirth(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("YYYY-MM-DD");
-        java.sql.Date date_birth = java.sql.Date.valueOf(scanner.next());
+        java.sql.Date date_birth = java.sql.Date.valueOf(scanner.nextLine());
 
         conn.setAutoCommit(false);
 
-        String query = "UPDATE person\n" +
-                "SET person.date_birth=?\n" +
-                "WHERE person.person_id=(\n" +
-                "SELECT DISTINCT person_id \n" +
-                "FROM coach \n" +
-                "WHERE coach_id=?);\n";
+        String query = """
+                UPDATE person
+                SET person.date_birth=?
+                WHERE person.person_id=(
+                SELECT DISTINCT person_id\s
+                FROM coach\s
+                WHERE coach_id=?);
+                """;
         ps = conn.prepareStatement(query);
         ps.setDate(1, date_birth);
         ps.setInt(2, coach_id);
@@ -386,9 +368,9 @@ public class StaffMenu {
         }
     }
 
-    private void editPhone(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void editPhone(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Phone");
         scanner.nextLine();
@@ -396,12 +378,14 @@ public class StaffMenu {
 
         conn.setAutoCommit(false);
 
-        String query = "UPDATE person\n" +
-                "SET person.phone=?\n" +
-                "WHERE person.person_id=(\n" +
-                "SELECT DISTINCT person_id \n" +
-                "FROM coach \n" +
-                "WHERE coach_id=?);\n";
+        String query = """
+                UPDATE person
+                SET person.phone=?
+                WHERE person.person_id=(
+                SELECT DISTINCT person_id\s
+                FROM coach\s
+                WHERE coach_id=?);
+                """;
         ps = conn.prepareStatement(query);
         ps.setString(1, phone);
         ps.setInt(2, coach_id);
@@ -420,18 +404,20 @@ public class StaffMenu {
         }
     }
 
-    private void editClassroom(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void editClassroom(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Classroom Certified");
-        int classroom_certified = scanner.nextInt();
+        int classroom_certified = Integer.parseInt(scanner.nextLine());
 
         conn.setAutoCommit(false);
 
-        String query = "UPDATE coach\n" +
-                "SET coach.classroom_certified=?\n" +
-                "WHERE coach_id=?;\n";
+        String query = """
+                UPDATE coach
+                SET coach.classroom_certified=?
+                WHERE coach_id=?;
+                """;
         ps = conn.prepareStatement(query);
         ps.setInt(1, classroom_certified);
         ps.setInt(2, coach_id);
@@ -450,18 +436,20 @@ public class StaffMenu {
         }
     }
 
-    private void editDirtBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void editDirtBike(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Dirt Bike Certified");
-        int dirtbike_certified = scanner.nextInt();
+        int dirtbike_certified = Integer.parseInt(scanner.nextLine());
 
         conn.setAutoCommit(false);
 
-        String query = "UPDATE coach\n" +
-                "SET coach.dirtbike_certified=?\n" +
-                "WHERE coach_id=?;\n";
+        String query = """
+                UPDATE coach
+                SET coach.dirtbike_certified=?
+                WHERE coach_id=?;
+                """;
         ps = conn.prepareStatement(query);
         ps.setInt(1, dirtbike_certified);
         ps.setInt(2, coach_id);
@@ -480,18 +468,20 @@ public class StaffMenu {
         }
     }
 
-    private void editStreetBike(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
+    private void editStreetBike(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Coach Id");
-        int coach_id = scanner.nextInt();
+        int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Street Bike Certified");
-        int streetbike_certified = scanner.nextInt();
+        int streetbike_certified = Integer.parseInt(scanner.nextLine());
 
         conn.setAutoCommit(false);
 
-        String query = "UPDATE coach\n" +
-                "SET coach.streetbike_certified=?\n" +
-                "WHERE coach_id=?;\n";
+        String query = """
+                UPDATE coach
+                SET coach.streetbike_certified=?
+                WHERE coach_id=?;
+                """;
         ps = conn.prepareStatement(query);
         ps.setInt(1, streetbike_certified);
         ps.setInt(2, coach_id);
@@ -510,29 +500,29 @@ public class StaffMenu {
         }
     }
 
-    private void createCoach(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException{
+    private void createCoach(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException{
         System.out.println("Name");
         scanner.nextLine();
         String full_name = scanner.nextLine();
 
-        System.out.println("adress");
+        System.out.println("address");
         String address = scanner.nextLine();
 
         System.out.println("YYYY-MM-DD");
-        String birthDate  = scanner.next();
+        String birthDate  = scanner.nextLine();
         java.sql.Date sqlDate = java.sql.Date.valueOf(birthDate);
 
         System.out.println("Phone");
-        String phone = scanner.next();
+        String phone = scanner.nextLine();
 
         System.out.println("classroom_certified");
-        int classroom_certified = scanner.nextInt();
+        int classroom_certified = Integer.parseInt(scanner.nextLine());
 
         System.out.println("dirtbike_certified");
-        int dirtbike_certified = scanner.nextInt();
+        int dirtbike_certified = Integer.parseInt(scanner.nextLine());
 
         System.out.println("streetbike_certified");
-        int streetbike_certified = scanner.nextInt();
+        int streetbike_certified = Integer.parseInt(scanner.nextLine());
 
         String query1 = "INSERT INTO person (full_name, address, date_birth, phone) VALUES (?, ?, ?, ?);";
         String query2 = "INSERT INTO coach (person_id, classroom_certified, dirtbike_certified, streetbike_certified)\n" +
@@ -545,7 +535,7 @@ public class StaffMenu {
         ps.setDate(3, sqlDate);
         ps.setString(4, phone);
 
-        PreparedStatement ps1 = null;
+        PreparedStatement ps1;
         ps1 = conn.prepareStatement(query2);
         ps1.setString(1, full_name);
         ps1.setString(2, address);

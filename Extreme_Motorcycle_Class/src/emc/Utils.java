@@ -29,13 +29,13 @@ public class Utils {
      */
     public static void printSet(ResultSet r) {
         // Used later to get metadata from the result set
-        ResultSetMetaData rsmd = null;
+        ResultSetMetaData rsmd;
 
         // Will hold the number of columns in the result set
-        int columnCount = 0;
+        int columnCount;
 
         // Create a list to later hold the column names from metadata
-        List<String> columnNames = new ArrayList<String>();
+        List<String> columnNames = new ArrayList<>();
 
         // Load metadata from the result set and get column count while we're at it
         try {
@@ -70,10 +70,10 @@ public class Utils {
         }
 
         // Read the result into a 2D array list of strings
-        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> result = new ArrayList<>();
         try {
             while (r.next()) {
-                ArrayList<String> row = new ArrayList<String>();
+                ArrayList<String> row = new ArrayList<>();
                 for (int i = 0; i < columnCount; i++) {
                     try {
                         row.add(r.getString(i + 1).trim());
@@ -117,9 +117,9 @@ public class Utils {
      * @param colMax
      */
     private static void printDivider(int[] colMax) {
-        for (int i = 0; i < colMax.length; i++) {
+        for (int max : colMax) {
             System.out.print("|");
-            for (int j = 0; j < colMax[i]; j++) {
+            for (int j = 0; j < max; j++) {
                 System.out.print("-");
             }
         }
@@ -133,10 +133,10 @@ public class Utils {
      */
     private static void printContents(ArrayList<ArrayList<String>> result, int[] colMax) {
         // Print the 2d array list of strings
-        for (int i = 0; i < result.size(); i++) {
+        for (ArrayList<String> strings : result) {
             System.out.print("|");
-            for (int j = 0; j < result.get(i).size(); j++) {
-                System.out.printf("%" + colMax[j] + "s", result.get(i).get(j));
+            for (int j = 0; j < strings.size(); j++) {
+                System.out.printf("%" + colMax[j] + "s", strings.get(j));
                 System.out.print("|");
             }
             System.out.println();

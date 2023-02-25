@@ -51,19 +51,19 @@ public class Main {
                 while(true) {
                     printMenu();
                     try {
-                        selection = scanner.nextInt();
-                        switch (selection){
-                        case 1: courseMenu.menu(rs, ps, conn, scanner); break;
-                        case 2: studentMenu.menu(rs, ps, conn); break;
-                        case 3: garageMenu.menu(rs, ps, conn, scanner); break;
-                        case 4: staffMenu.menu(rs, ps, conn, scanner); break;
-                        case 5: infMenu.menu(rs, ps, conn, scanner); break;
-                        case 0: System.exit(0);
+                        selection = Integer.parseInt(scanner.nextLine());
+                        switch (selection) {
+                            case 1 -> courseMenu.menu(rs, ps, conn, scanner);
+                            case 2 -> studentMenu.menu(rs, ps, conn);
+                            case 3 -> garageMenu.menu(rs, ps, conn, scanner);
+                            case 4 -> staffMenu.menu(rs, ps, conn, scanner);
+                            case 5 -> infMenu.menu(rs, ps, conn, scanner);
+                            case 0 -> System.exit(0);
                         }
                         
                     }catch (InputMismatchException ex){
                         System.out.println("Please enter an integer value between 0 and 5" );
-                        scanner.next();
+                        scanner.nextLine();
                     }
                     
                     
@@ -80,8 +80,9 @@ public class Main {
             try {
                 rs.close();
                 stmt.close();
-            } catch (Throwable t) {
-            } 
+            } catch (Exception e) {
+                System.out.println("Error Closing Resources");
+            }
             
             try {
                 conn.close();

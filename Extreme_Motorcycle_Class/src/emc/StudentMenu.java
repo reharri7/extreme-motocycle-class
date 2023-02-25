@@ -449,7 +449,7 @@ public class StudentMenu {
 
                     ps = conn.prepareStatement(DELETE_STUDENT);
                     ps.setInt(1, studentId);
-                    result = ps.executeUpdate();
+                    ps.executeUpdate();
                     System.out.println("Deleted Student!");
                     conn.commit();
 

@@ -98,16 +98,16 @@ public class InfrastructureMenu {
         while(true) {
             printMenu();
             try {
-                selection = scanner.nextInt();
+                selection = Integer.parseInt(scanner.nextLine());
                 switch (selection) {
                     case 0 -> {
                         return;
                     }
-                    case 1 -> manageRanges(resultSet, preparedStatement, connection, scanner);
-                    case 2 -> manageClassrooms(resultSet, preparedStatement, connection, scanner);
+                    case 1 -> manageRanges(preparedStatement, connection, scanner);
+                    case 2 -> manageClassrooms(preparedStatement, connection, scanner);
                     default -> System.out.println("Invalid selection. Please try again.");
                 }
-            } catch (InputMismatchException e) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Invalid selection. Please try again.");
                 scanner.nextLine();
             }
@@ -115,13 +115,13 @@ public class InfrastructureMenu {
     }
 
 
-    private void manageRanges(ResultSet resultSet, PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
+    private void manageRanges(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
         int manageRangeSelection;
 
         while(true) {
             printRangeMenu();
             try {
-                manageRangeSelection = scanner.nextInt();
+                manageRangeSelection = Integer.parseInt(scanner.nextLine());
                 switch (manageRangeSelection) {
                     case 0 -> {
                         return;
@@ -136,15 +136,15 @@ public class InfrastructureMenu {
                         viewRanges(connection);
                     }
                     case 4 -> {
-                        deleteRange(resultSet, preparedStatement, connection, scanner);
+                        deleteRange(preparedStatement, connection, scanner);
                         viewRanges(connection);
                     }
                     case 5 -> assignRange(connection, scanner);
                     case 6 -> unassignRange(connection, scanner);
-                    case 7 -> viewRangeSchedule(resultSet, preparedStatement, connection, scanner);
+                    case 7 -> viewRangeSchedule(connection, scanner);
                     case 8 -> createRangeType(connection, scanner);
                     case 9 -> viewRangeTypes(connection);
-                    case 10 -> editRangeType(resultSet, preparedStatement, connection, scanner);
+                    case 10 -> editRangeType(preparedStatement, connection, scanner);
                     case 11 -> deleteRangeType(preparedStatement, connection, scanner);
                     default -> System.out.println("Invalid selection. Please try again.");
                 }
@@ -154,19 +154,19 @@ public class InfrastructureMenu {
             }
         }
     }
-    private void manageClassrooms(ResultSet resultSet, PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
+    private void manageClassrooms(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
         int manageClassroomSelection;
 
         while(true) {
             printClassroomMenu();
             try {
-                manageClassroomSelection = scanner.nextInt();
+                manageClassroomSelection = Integer.parseInt(scanner.nextLine());
                 switch (manageClassroomSelection) {
                     case 0 -> {
                         return;
                     }
                     case 1 -> {
-                        createClassroom(connection, scanner);
+                        createClassroom(connection);
                         viewClassrooms(connection);
                     }
                     case 2 -> viewClassrooms(connection);
@@ -181,7 +181,7 @@ public class InfrastructureMenu {
                     }
                     case 6 -> viewCourseSchedules(connection);
                     case 7 -> {
-                        editCourseSchedule(resultSet, connection, scanner);
+                        editCourseSchedule(connection, scanner);
                         viewCourseSchedules(connection);
                     }
                     case 8 -> {
@@ -212,7 +212,7 @@ public class InfrastructureMenu {
     private void deleteCourseSchedule(Connection connection, Scanner scanner) {
         viewCourseSchedules(connection);
         System.out.println("Enter course schedule id: ");
-        int courseScheduleId = scanner.nextInt();
+        int courseScheduleId = Integer.parseInt(scanner.nextLine());
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_COURSE_SCHEDULE_BY_ID);
             preparedStatement.setInt(1, courseScheduleId);
@@ -222,23 +222,23 @@ public class InfrastructureMenu {
         }
     }
 
-    private void editCourseSchedule(ResultSet resultSet, Connection connection, Scanner scanner) {
+    private void editCourseSchedule(Connection connection, Scanner scanner) {
         viewCourseSchedules(connection);
         System.out.println("Enter course schedule id: ");
-        int courseScheduleId = scanner.nextInt();
+        int courseScheduleId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter course id: ");
-        int courseId = scanner.nextInt();
+        int courseId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter year for course schedule: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for course schedule: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for course schedule: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date = LocalDate.of(year, month, day);
         System.out.println("Enter classroom id: ");
-        int classroomId = scanner.nextInt();
+        int classroomId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter 1 for Morning or 2 for Afternoon: ");
-        int timeType = scanner.nextInt();
+        int timeType = Integer.parseInt(scanner.nextLine());
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COURSE_SCHEDULE_BY_ID);
             preparedStatement.setInt(1, courseId);
@@ -253,8 +253,8 @@ public class InfrastructureMenu {
     }
 
     private void viewCourseSchedules(Connection connection) {
-        ResultSet resultSet = null;
-        PreparedStatement preparedStatement = null;
+        ResultSet resultSet;
+        PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement(SELECT_ALL_COURSE_SCHEDULES);
             resultSet = preparedStatement.executeQuery();
@@ -268,19 +268,19 @@ public class InfrastructureMenu {
         ResultSet resultSet = null;
         CourseMenu.viewAllCourses(resultSet, preparedStatement, connection);
         System.out.println("Enter course id: ");
-        int courseId = scanner.nextInt();
+        int courseId = Integer.parseInt(scanner.nextLine());
         viewClassrooms(connection);
         System.out.println("Enter classroom id: ");
-        int classroomId = scanner.nextInt();
+        int classroomId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter year for course schedule: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for course schedule: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for course schedule: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date = Utils.createLocalDate(year, month, day);
         System.out.println("Enter 1 for Morning or 2 for Afternoon: ");
-        int timeType = scanner.nextInt();
+        int timeType = Integer.parseInt(scanner.nextLine());
 
         try {
             connection.setAutoCommit(false);
@@ -301,7 +301,6 @@ public class InfrastructureMenu {
         } catch (SQLException e) {
             System.out.println("Error during course schedule insert.");
             e.printStackTrace();
-            e.getErrorCode();
         } finally {
             try {
                 if(preparedStatement != null) {
@@ -313,7 +312,7 @@ public class InfrastructureMenu {
         }
     }
 
-    private void createClassroom(Connection connection, Scanner scanner) {
+    private void createClassroom(Connection connection) {
         PreparedStatement preparedStatement = null;
         try {
             connection.setAutoCommit(false);
@@ -343,7 +342,7 @@ public class InfrastructureMenu {
 
     private void deleteClassroom(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
         System.out.println("Enter classroom id: ");
-        int classroomId = scanner.nextInt();
+        int classroomId = Integer.parseInt(scanner.nextLine());
         try {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(DELETE_CLASSROOM_BY_ID);
@@ -396,7 +395,7 @@ public class InfrastructureMenu {
         while(true) {
             printViewClassroomScheduleSubMenu();
             try {
-                viewClassroomScheduleSelection = scanner.nextInt();
+                viewClassroomScheduleSelection = Integer.parseInt(scanner.nextLine());
                 switch (viewClassroomScheduleSelection) {
                     case 0 -> {
                         return;
@@ -423,16 +422,16 @@ public class InfrastructureMenu {
 
     private void viewClassroomAvailability(Connection connection, Scanner scanner) {
         System.out.println("Enter year for which would like to view classroom availability: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for which would like to view classroom availability: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for which would like to view classroom availability: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date;
         System.out.println("Would you like to view availability for morning or afternoon?");
         System.out.println("1. Morning");
         System.out.println("2. Afternoon");
-        int timeOfDay = scanner.nextInt();
+        int timeOfDay = Integer.parseInt(scanner.nextLine());
         if(timeOfDay != 1 && timeOfDay != 2) {
             System.out.println("Invalid selection.");
             return;
@@ -446,7 +445,6 @@ public class InfrastructureMenu {
             Utils.printSet(resultSet);
         } catch (DateTimeException dateTimeException) {
             System.out.println("Invalid date entered.");
-            return;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -456,13 +454,13 @@ public class InfrastructureMenu {
         viewClassrooms(connection);
         System.out.println("Which classroom would you like to view the schedule for?");
         System.out.println("Enter classroom ID: ");
-        int classroom_id = scanner.nextInt();
+        int classroom_id = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter year for which would like to view classroom schedule: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for which would like to view classroom schedule: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for which would like to view classroom schedule: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date;
         try {
             date = Utils.createLocalDate(year, month, day);
@@ -509,7 +507,7 @@ public class InfrastructureMenu {
         // Grab all range types
         viewRangeTypes(connection);
         System.out.println("Enter range type ID: ");
-        rangeTypeId = scanner.nextInt();
+        rangeTypeId = Integer.parseInt(scanner.nextLine());
 
         // verify that range type exists
         if(!rangeTypeExists(preparedStatement, connection, rangeTypeId)) {
@@ -573,7 +571,7 @@ public class InfrastructureMenu {
     ) {
         viewRanges(connection);
         System.out.println("Enter range ID to edit: ");
-        int rangeId = scanner.nextInt();
+        int rangeId = Integer.parseInt(scanner.nextLine());
         // verify range exists
         if(!rangeExists(preparedStatement, connection, rangeId)) {
             System.out.println("Range does not exist.");
@@ -581,7 +579,7 @@ public class InfrastructureMenu {
         }
         viewRangeTypes(connection);
         System.out.println("Enter new range type ID: ");
-        int rangeTypeId = scanner.nextInt();
+        int rangeTypeId = Integer.parseInt(scanner.nextLine());
         // verify bike range type exists
         if(!rangeTypeExists(preparedStatement, connection, rangeTypeId)) {
             System.out.println("Range type does not exist.");
@@ -607,14 +605,13 @@ public class InfrastructureMenu {
         }
 
     }
-    private void deleteRange(ResultSet resultSet,
-                             PreparedStatement preparedStatement,
+    private void deleteRange(PreparedStatement preparedStatement,
                              Connection connection,
                              Scanner scanner
     ) {
         viewRanges(connection);
         System.out.println("Enter range ID to delete: ");
-        int rangeId = scanner.nextInt();
+        int rangeId = Integer.parseInt(scanner.nextLine());
         // verify range exists
         if(!rangeExists(preparedStatement, connection, rangeId)) {
             System.out.println("Range does not exist.");
@@ -638,9 +635,7 @@ public class InfrastructureMenu {
             e.printStackTrace();
         }
     }
-    private void viewRangeSchedule(ResultSet resultSet,
-                                   PreparedStatement preparedStatement,
-                                   Connection connection,
+    private void viewRangeSchedule(Connection connection,
                                    Scanner scanner
     ) {
         int viewRangeScheduleSelection;
@@ -648,7 +643,7 @@ public class InfrastructureMenu {
         while(true) {
             printViewRangeScheduleSubMenu();
             try {
-                viewRangeScheduleSelection = scanner.nextInt();
+                viewRangeScheduleSelection = Integer.parseInt(scanner.nextLine());
                 switch (viewRangeScheduleSelection) {
                     case 0 -> {
                         return;
@@ -667,16 +662,16 @@ public class InfrastructureMenu {
 
     private void viewRangeAvailability(Connection connection, Scanner scanner) {
         System.out.println("Enter year for which would like to view range availability: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for which would like to view range availability: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for which would like to view range availability: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date;
         System.out.println("Would you like to view availability for morning or afternoon?");
         System.out.println("1. Morning");
         System.out.println("2. Afternoon");
-        int timeOfDay = scanner.nextInt();
+        int timeOfDay = Integer.parseInt(scanner.nextLine());
         if(timeOfDay != 1 && timeOfDay != 2) {
             System.out.println("Invalid selection.");
             return;
@@ -690,9 +685,8 @@ public class InfrastructureMenu {
             Utils.printSet(resultSet);
         } catch (DateTimeException dateTimeException) {
             System.out.println("Invalid date entered.");
-            return;
         } catch (SQLException e) {
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
     }
 
@@ -700,13 +694,13 @@ public class InfrastructureMenu {
         viewRanges(connection);
         System.out.println("Which range would you like to view the schedule for?");
         System.out.println("Enter range ID: ");
-        int rangeId = scanner.nextInt();
+        int rangeId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter year for which would like to view range schedule: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for which would like to view range schedule: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for which would like to view range schedule: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date;
         try {
             date = Utils.createLocalDate(year, month, day);
@@ -744,11 +738,11 @@ public class InfrastructureMenu {
 
     private void assignRange(Connection connection, Scanner scanner) {
         System.out.println("Enter year for which would like to view course schedule: ");
-        int year = scanner.nextInt();
+        int year = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter month for which would like to view course schedule: ");
-        int month = scanner.nextInt();
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter day for which would like to view course schedule: ");
-        int day = scanner.nextInt();
+        int day = Integer.parseInt(scanner.nextLine());
         LocalDate date;
         try {
             date = Utils.createLocalDate(year, month, day);
@@ -768,11 +762,11 @@ public class InfrastructureMenu {
             System.out.println("Course Schedule");
             Utils.printSet(courseScheduleResultSet);
         } catch(SQLException e) {
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
 
         System.out.println("Enter course schedule ID for which you would like to assign a range: ");
-        int courseScheduleId = scanner.nextInt();
+        int courseScheduleId = Integer.parseInt(scanner.nextLine());
         List<Integer> listOfAvailableRanges = new ArrayList<>();
         // get the date of the selected course
         LocalDate courseDate = null;
@@ -808,10 +802,10 @@ public class InfrastructureMenu {
                 );
             }
         } catch (SQLException e) {
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
         System.out.println("Enter range ID to assign: ");
-        int rangeId = scanner.nextInt();
+        int rangeId = Integer.parseInt(scanner.nextLine());
 
         // verify range is available and exists
         if(!listOfAvailableRanges.contains(rangeId)) {
@@ -832,7 +826,7 @@ public class InfrastructureMenu {
                 connection.rollback();
             }
         } catch (SQLException e) {
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
     }
     private void unassignRange(Connection connection,
@@ -840,7 +834,7 @@ public class InfrastructureMenu {
     ) {
         printRangeAssignments(connection);
         System.out.println("Enter range assignment ID to unassign: ");
-        int rangeAssignmentId = scanner.nextInt();
+        int rangeAssignmentId = Integer.parseInt(scanner.nextLine());
         try {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RANGE_ASSIGNMENT_BY_ID);
@@ -872,7 +866,7 @@ public class InfrastructureMenu {
     ) {
         String rangeType;
         System.out.println("Enter range type: ");
-        rangeType = scanner.next();
+        rangeType = scanner.nextLine();
         try {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO range_type (range_type_value) VALUES (?)");
@@ -888,7 +882,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type creation.");
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
     }
 
@@ -903,7 +897,7 @@ public class InfrastructureMenu {
             Utils.printSet(resultSet);
         } catch (SQLException e) {
             System.out.println("Error during range type retrieval.");
-            e.getMessage();
+            System.out.println("SQL Exception");
         } finally {
             try {
                 if(resultSet != null) {
@@ -924,7 +918,7 @@ public class InfrastructureMenu {
             preparedStatement = connection.prepareStatement(SELECT_FROM_BIKE_RANGE_BY_ID);
         } catch (SQLException e) {
             System.out.println("Error during range retrieval.");
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
         try {
             preparedStatement.setInt(1, rangeId);
@@ -934,7 +928,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range retrieval.");
-            e.getMessage();
+            System.out.println("SQL Exception");
         } finally {
             try {
                 if(resultSet != null) {
@@ -965,7 +959,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type retrieval.");
-            e.getMessage();
+            System.out.println("SQL Exception");
         } finally {
             try {
                 if(resultSet != null) {
@@ -980,21 +974,20 @@ public class InfrastructureMenu {
         }
         return rangeTypeExists;
     }
-    private void editRangeType(ResultSet resultSet,
-                               PreparedStatement preparedStatement,
+    private void editRangeType(PreparedStatement preparedStatement,
                                Connection connection,
                                Scanner scanner
     ) {
         viewRangeTypes(connection);
         System.out.println("Enter range type ID to edit: ");
-        int rangeTypeId = scanner.nextInt();
+        int rangeTypeId = Integer.parseInt(scanner.nextLine());
         if(!rangeTypeExists(preparedStatement, connection, rangeTypeId)) {
             System.out.println("Range type does not exist.");
             return;
         }
         String rangeType;
         System.out.println("Enter new range type: ");
-        rangeType = scanner.next();
+        rangeType = scanner.nextLine();
         try {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement("UPDATE range_type SET range_type_value = ? WHERE range_type_id = ?");
@@ -1018,7 +1011,7 @@ public class InfrastructureMenu {
     ) {
         viewRangeTypes(connection);
         System.out.println("Enter range type ID to delete: ");
-        int rangeTypeId = scanner.nextInt();
+        int rangeTypeId = Integer.parseInt(scanner.nextLine());
         if(!rangeTypeExists(preparedStatement, connection, rangeTypeId)) {
             System.out.println("Range type does not exist.");
             return;
@@ -1037,7 +1030,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type deletion.");
-            e.getMessage();
+            System.out.println("SQL Exception");
         }
     }
     private void printRangeMenu() {
