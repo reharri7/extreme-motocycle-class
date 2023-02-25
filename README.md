@@ -1,7 +1,7 @@
 # extreme-motorcycle-class
 
 This program relies on the extreme-motorcycle-class mySQL database. Prior to running,
-`Script-3.sql` from the repository should be run to build the database and sample.sql to fill
+`Script-3.sql` from the repository should be run to build the database and `sample.sql` to fill
 the database with data. Once the program runs, users may interact with the command line interface (CLI)
 to administer the database by entering option numbers and requested information.
 
