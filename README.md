@@ -8,6 +8,12 @@ to administer the database by entering option numbers and requested information.
 The program will provide feedback for successful and unsuccessful queries, includes error handling, and
 mirrors the queries created by Team 4 in prior deliverables.
 
+## Code Walk Through
+https://drive.google.com/file/d/18Ri65ju8MHd2xpgJrKWhRIqvA6v9_ghK/view?usp=sharing
+
+## Program Walk Through
+https://drive.google.com/file/d/1YefSYQekHU196tZoxHNs_DVfFJiSbaD1/view?usp=sharing
+
 ## Compile:
 
 Users can run the bash script `run.sh` to build and run the program, assuming they have the necessary folder structure.
