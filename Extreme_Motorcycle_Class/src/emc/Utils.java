@@ -23,8 +23,8 @@ public class Utils {
         return LocalDate.of(year, month, day);
     }
 
-    
-    /** 
+
+    /**
      * @param r
      */
     public static void printSet(ResultSet r) {
@@ -98,8 +98,8 @@ public class Utils {
 
     }
 
-    
-    /** 
+
+    /**
      * @param colNames
      * @param colMax
      */
@@ -112,8 +112,8 @@ public class Utils {
         System.out.println("|");
     }
 
-    
-    /** 
+
+    /**
      * @param colMax
      */
     private static void printDivider(int[] colMax) {
@@ -126,8 +126,8 @@ public class Utils {
         System.out.println("|");
     }
 
-    
-    /** 
+
+    /**
      * @param result
      * @param colMax
      */

@@ -9,8 +9,8 @@ import java.util.Scanner;
 
 public class GarageMenu {
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -105,8 +105,8 @@ public class GarageMenu {
         System.out.println("0. Main Menu");
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -135,8 +135,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -188,8 +188,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -217,8 +217,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -247,8 +247,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -277,8 +277,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -300,7 +300,7 @@ public class GarageMenu {
             System.out.println("Failed to read input.");
             return;
         }
-        
+
         // We check for valid attributes here to avoid SQL injection and ensure we are only changing things we want to be changed.
         String[] validAttributes = {"problem_id", "problem_date", "bike_id", "repair_date", "description", "cost"};
         boolean validAttribute = false;
@@ -339,8 +339,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -367,8 +367,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -383,7 +383,7 @@ public class GarageMenu {
 
         System.out.println("Please enter a description of the problem between 1 and 150 characters: ");
         String description = "";
-        
+
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
             description = reader.readLine();
@@ -407,11 +407,11 @@ public class GarageMenu {
             ps.setInt(5, cost);
             ps.executeUpdate();
             System.out.println("Sucessfully created bike problem");
-        } 
+        }
         catch (SQLException e) {
             System.out.println("Query failed.  Ensure you entered a valid date and did not exceed the character limit for the description.");
-        } 
-        
+        }
+
         finally {
             if (ps != null) {
                 try {
@@ -423,8 +423,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -435,10 +435,10 @@ public class GarageMenu {
         int bikeID = scanner.nextInt();
 
         String query = "SELECT course_schedule.course_date,course.course_name "
-            + "FROM bike_assignment,course_schedule,course "
-            + "WHERE bike_assignment.course_schedule_id=course_schedule.course_schedule_id "
-            + "AND course_schedule.course_id=course.course_id "
-            + "AND bike_assignment.bike_id=?";
+                + "FROM bike_assignment,course_schedule,course "
+                + "WHERE bike_assignment.course_schedule_id=course_schedule.course_schedule_id "
+                + "AND course_schedule.course_id=course.course_id "
+                + "AND bike_assignment.bike_id=?";
 
         try {
             ps = conn.prepareStatement(query);
@@ -461,8 +461,8 @@ public class GarageMenu {
 
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -495,8 +495,8 @@ public class GarageMenu {
     }
 
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -526,8 +526,8 @@ public class GarageMenu {
 
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -562,8 +562,8 @@ public class GarageMenu {
 
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -612,8 +612,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -651,7 +651,7 @@ public class GarageMenu {
             ps.setInt(2, bikeID);
             ps.executeUpdate();
             System.out.println("Sucessfully updated bike " + bikeID + " with new value " + newValue);
-        } 
+        }
         catch (SQLException e) {
             System.out.println("We were unable to update the bike. Are you sure the bike exists?");
         }
@@ -666,8 +666,8 @@ public class GarageMenu {
         }
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
@@ -687,8 +687,8 @@ public class GarageMenu {
         Utils.printSet(rs);
     }
 
-    
-    /** 
+
+    /**
      * @param rs
      * @param stmt
      * @param conn
