@@ -24,7 +24,7 @@ public class StaffMenu {
                 choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
                     case 1 -> createCoach(ps, conn, scanner);
-                    case 2 -> viewCoach(rs, ps);
+                    case 2 -> viewCoach(rs, ps, conn);
                     case 3 -> editCoach(ps, conn, scanner);
                     case 4 -> deleteCoach(ps, conn, scanner);
                     case 5 -> assignCoach(ps, conn, scanner);
@@ -72,15 +72,16 @@ public class StaffMenu {
         System.out.println("0. Coach Menu");
     }
 
-    private void viewCoach(ResultSet rs, PreparedStatement ps) {
+    private void viewCoach(ResultSet rs, PreparedStatement ps, Connection conn) {
         System.out.println(": ");
         String query = """
-                SELECT coach.coach_id,person.full_name
+                SELECT coach_id, classroom_certified, dirtbike_certified, streetbike_certified, full_name, address, date_birth, phone
                 FROM coach,person\s
                 WHERE coach.person_id=person.person_id;
-                """;
+                """; 
         try {
-            rs = ps.executeQuery(query);
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -111,7 +112,6 @@ public class StaffMenu {
 
     private void coachAvailabilitySchedule(ResultSet rs, PreparedStatement ps, Connection conn, Scanner scanner) {
         System.out.println("YYYY-MM-DD");
-        scanner.nextLine();
         String date = scanner.nextLine();
 
         System.out.println("Enter 'AM range' or 'PM range': ");
@@ -302,7 +302,6 @@ public class StaffMenu {
         int coach_id = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Address");
-        scanner.nextLine();
         String address = scanner.nextLine();
 
         conn.setAutoCommit(false);
@@ -502,7 +501,6 @@ public class StaffMenu {
 
     private void createCoach(PreparedStatement ps, Connection conn, Scanner scanner) throws SQLException{
         System.out.println("Name");
-        scanner.nextLine();
         String full_name = scanner.nextLine();
 
         System.out.println("address");

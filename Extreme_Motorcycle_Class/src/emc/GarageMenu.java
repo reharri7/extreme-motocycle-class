@@ -247,8 +247,8 @@ public class GarageMenu {
      * @param scanner
      */
     private void editBikeProblem(PreparedStatement ps, Connection conn, Scanner scanner) {
-        System.out.println("Please enter a number for the bike's ID: ");
-        int bikeID = Integer.parseInt(scanner.nextLine());
+        System.out.println("Please enter a number for the problem ID: ");
+        int problemID = Integer.parseInt(scanner.nextLine());
 
         System.out.println("Please enter the attribute you wish to change: ");
         String attribute = scanner.nextLine();
@@ -278,14 +278,14 @@ public class GarageMenu {
             return;
         }
 
-        String query = "UPDATE problem SET " + attribute + "=? WHERE bike_id=?";
+        String query = "UPDATE problem SET " + attribute + "=? WHERE problem_id=?";
 
         try {
             ps = conn.prepareStatement(query);
             ps.setString(1, newValue);
-            ps.setInt(2, bikeID);
+            ps.setInt(2, problemID);
             ps.executeUpdate();
-            System.out.println(attribute + " successfully updated for bike " + bikeID + ".");
+            System.out.println(attribute + " successfully updated for bike " + problemID + ".");
         }
         catch (SQLException e) {
             System.out.println("Query failed. Ensure the bike ID is correct and try again.");
@@ -308,7 +308,7 @@ public class GarageMenu {
      * @param conn
      */
     private void viewBikeProblem(ResultSet rs, PreparedStatement ps, Connection conn) {
-        String query = "SELECT * FROM problem";
+        String query = "SELECT problem_id, problem_date, repair_date, description, cost FROM problem";
         try {
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
@@ -432,7 +432,7 @@ public class GarageMenu {
         System.out.println("Please enter a number for the bike's ID: ");
         int bikeID = Integer.parseInt(scanner.nextLine());
 
-        String query = "SELECT problem_date,repair_date,description,cost FROM problem WHERE bike_id=?";
+        String query = "SELECT problem_id, problem_date,repair_date,description,cost FROM problem WHERE bike_id=?";
         
         try {
             ps = conn.prepareStatement(query);

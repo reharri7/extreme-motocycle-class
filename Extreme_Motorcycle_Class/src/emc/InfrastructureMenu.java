@@ -284,7 +284,6 @@ public class InfrastructureMenu {
 
         try {
             connection.setAutoCommit(false);
-            System.out.println(INSERT_COURSE_SCHEDULE);
             preparedStatement = connection.prepareStatement(INSERT_COURSE_SCHEDULE);
             preparedStatement.setInt(1, courseId);
             preparedStatement.setDate(2, Date.valueOf(date));
@@ -347,7 +346,7 @@ public class InfrastructureMenu {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(DELETE_CLASSROOM_BY_ID);
             preparedStatement.setInt(1, classroomId);
-            int result = preparedStatement.executeUpdate(DELETE_CLASSROOM_BY_ID);
+            int result = preparedStatement.executeUpdate();
             if(result == 1) {
                 System.out.println("Classroom deleted successfully.");
                 connection.commit();

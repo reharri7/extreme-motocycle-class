@@ -76,9 +76,14 @@ public class Utils {
                 ArrayList<String> row = new ArrayList<>();
                 for (int i = 0; i < columnCount; i++) {
                     try {
-                        row.add(r.getString(i + 1).trim());
-                        if (r.getString(i + 1).trim().length() > colMax[i]) {
-                            colMax[i] = r.getString(i + 1).trim().length() + 5;
+                        if(r.getString(i+1) == null) {
+                            row.add("NULL");
+                        }else {
+                            row.add(r.getString(i + 1).trim());
+                        
+                            if (r.getString(i + 1).trim().length() > colMax[i]) {
+                                colMax[i] = r.getString(i + 1).trim().length() + 5;
+                            }
                         }
                     } catch (SQLException e) {
                         System.out.println("Error getting column value");

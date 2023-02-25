@@ -80,6 +80,7 @@ public class Main {
             try {
                 rs.close();
                 stmt.close();
+                ps.close();
             } catch (Exception e) {
                 System.out.println("Error Closing Resources");
             }
