@@ -53,7 +53,7 @@ public class Main {
                     try {
                         selection = scanner.nextInt();
                         switch (selection){
-                        case 1: courseMenu.menu(rs, stmt, conn, scanner); break;
+                        case 1: courseMenu.menu(rs, ps, conn, scanner); break;
                         case 2: studentMenu.menu(rs, ps, conn); break;
                         case 3: garageMenu.menu(rs, stmt, conn, scanner); break;
                         case 4: staffMenu.menu(rs, stmt, conn, scanner); break;

@@ -16,13 +16,6 @@ public class InfrastructureMenu {
     private static final String UPDATE_BIKE_RANGE_BY_ID = "UPDATE bike_range SET range_type = ? WHERE range_id = ?";
     private static final String DELETE_BIKE_RANGE_BY_ID = "DELETE from bike_range WHERE range_id = ?";
     private static final String INSERT_RANGE_ASSIGNMENT = "insert into range_assignment (range_id, course_schedule_id) values (?, ?)";
-    private static final String SELECT_ALL_COURSE = "SELECT * FROM course";
-    private static final String SELECT_RANGE_AVAILABILITY_BY_WEEK = "SELECT ra.range_id " +
-            " from course_schedule cs" +
-            " left join range_assignment ra on cs.course_schedule_id = ra.course_schedule_id " +
-            " where ra.range_id = ? " +
-            " and cs.course_date = ? " +
-            " and cs.time_type_id = ?";
     private static final String SELECT_COURSE_SCHEDULE_BY_WEEK_WITHOUT_RANGE_ASSIGNMENT =
             "SELECT cs.course_schedule_id, " +
                     " cs.course_date, " +
@@ -39,18 +32,20 @@ public class InfrastructureMenu {
                     " AND cs.course_date < ? " +
                     " ORDER BY cs.course_date";
     private static final String SELECT_AVAILABLE_RANGE_BY_COURSE_SCHEDULE_ID = "" +
-            "select bike_range.range_id, " +
-            "rt.range_type_value, " +
-            "bike_range.capacity " +
-            "from bike_range " +
-            "left join range_type rt on bike_range.range_type = rt.range_type_id " +
-            "where bike_range.range_id not in " +
-            "(select distinct ra.range_id from course_schedule " +
-            "left join range_assignment ra on course_schedule.course_schedule_id = ra.course_schedule_id " +
-            "where course_schedule.course_schedule_id = ?) " +
-            "or (select distinct ra.range_id from course_schedule " +
-            "left join range_assignment ra on course_schedule.course_schedule_id = ra.course_schedule_id " +
-            "where course_schedule.course_schedule_id = ?) is null";
+            " select bike_range.range_id, " +
+            " rt.range_type_value, " +
+            " bike_range.capacity " +
+            " from bike_range " +
+            " left join range_type rt on bike_range.range_type = rt.range_type_id " +
+            " where bike_range.range_id not in " +
+            " (select distinct ra.range_id from course_schedule " +
+            " left join range_assignment ra on course_schedule.course_schedule_id = ra.course_schedule_id " +
+            " where course_schedule.course_schedule_id = ? " +
+            " and course_schedule.course_date = ?) " +
+            " or (select distinct ra.range_id from course_schedule " +
+            " left join range_assignment ra on course_schedule.course_schedule_id = ra.course_schedule_id " +
+            " where course_schedule.course_schedule_id = ? " +
+            " and course_schedule.course_date = ?) is null";
     private static final String SELECT_AVAILABLE_RANGES_BY_DATE_AND_TIME = "select range_id " +
             "from bike_range " +
             "where bike_range.range_id not in (select ra.range_id " +
@@ -58,27 +53,33 @@ public class InfrastructureMenu {
             "left join course_schedule cs on ra.course_schedule_id = cs.course_schedule_id " +
             "where cs.course_date = ? and cs.time_type_id = ?) " +
             "order by range_id";
+    private static final String SELECT_AVAILABLE_CLASSROOMS_BY_DATE_AND_TIME = "select classroom_id " +
+            "from classroom " +
+            "where classroom_id not in (select cs.classroom_id " +
+            "from course_schedule cs " +
+            "where cs.course_date = ? and cs.time_type_id = ?) " +
+            "order by classroom_id";
     private static final String DELETE_RANGE_ASSIGNMENT_BY_ID = "delete from range_assignment where range_assignment_id = ?";
-    private static final String INSERT_CLASSROOM = "INSERT INTO classroom (capacity) VALUES (?)";
-    private static final String UPDATE_CLASSROOM_BY_ID = "UPDATE classroom SET capacity = ? WHERE classroom_id = ?";
+    private static final String INSERT_CLASSROOM = "INSERT INTO classroom (capacity) VALUES (15)";
     private static final String SELECT_ALL_CLASSROOMS = "SELECT * FROM classroom";
     private static final String DELETE_CLASSROOM_BY_ID = "DELETE FROM classroom WHERE classroom_id = ?";
-    private static final String SELECT_CLASSROOM_SCHEDULE = "SELECT cs.course_schedule_id, " +
-            "cs.course_date, " +
-            "course.course_name, " +
-            "ct.course_type_value, " +
-            "tt.time_type_value, " +
-            "ca.classroom_assignment_id, " +
-            "ca.classroom_id " +
-            "FROM course " +
-            "left join course_schedule cs on course.course_id = cs.course_id " +
-            "left join course_type ct on course.course_type = ct.course_type_id " +
-            "left join time_type tt on cs.time_type_id = tt.time_type_id " +
-            "left join classroom_assignment ca on cs.course_schedule_id = ca.course_schedule_id " +
-            "WHERE course.course_id = cs.course_id " +
-            "AND cs.course_date >= ? " +
-            "AND cs.course_date < ? " +
-            "ORDER BY cs.course_date";
+    private static final String INSERT_COURSE_SCHEDULE = "insert into course_schedule (course_id, course_date, time_type_id, classroom_id) values(?, ?, ?, ?)";
+    private static final String SELECT_ALL_COURSE_SCHEDULES = "SELECT * FROM course_schedule";
+    private static final String SELECT_COURSE_SCHEDULE_DATE_BY_ID = "SELECT course_date FROM course_schedule WHERE course_schedule_id = ?";
+    private static final String DELETE_COURSE_SCHEDULE_BY_ID = "DELETE FROM course_schedule WHERE course_schedule_id = ?";
+    private static final String UPDATE_COURSE_SCHEDULE_BY_ID = "UPDATE course_schedule SET course_id = ?, course_date = ?, time_type_id = ?, classroom_id = ? WHERE course_schedule_id = ?";
+    private static final String SELECT_CLASSROOM_SCHEDULE = "SELECT cs.course_schedule_id " +
+            " from course_schedule cs " +
+            " left join classroom cl on cs.classroom_id = cl.classroom_id " +
+            " where cs.classroom_id = ? " +
+            " and cs.course_date = ? " +
+            " and cs.time_type_id = ?";
+    private static final String SELECT_RANGE_AVAILABILITY_BY_WEEK = "SELECT ra.range_id " +
+            " from course_schedule cs" +
+            " left join range_assignment ra on cs.course_schedule_id = ra.course_schedule_id " +
+            " where ra.range_id = ? " +
+            " and cs.course_date = ? " +
+            " and cs.time_type_id = ?";
     /**
      * Print student menu options and call appropriate method.
      * @param resultSet
@@ -157,7 +158,7 @@ public class InfrastructureMenu {
         int manageClassroomSelection;
 
         while(true) {
-            printRangeMenu();
+            printClassroomMenu();
             try {
                 manageClassroomSelection = scanner.nextInt();
                 switch (manageClassroomSelection) {
@@ -165,21 +166,28 @@ public class InfrastructureMenu {
                         return;
                     }
                     case 1 -> {
-                        createClassroom(preparedStatement, connection, scanner);
+                        createClassroom(connection, scanner);
                         viewClassrooms(connection);
                     }
                     case 2 -> viewClassrooms(connection);
                     case 3 -> {
-                        editClassroom(preparedStatement, connection, scanner);
+                        deleteClassroom(preparedStatement, connection, scanner);
                         viewClassrooms(connection);
                     }
-                    case 4 -> {
-                        deleteClassroom(resultSet, preparedStatement, connection, scanner);
-                        viewClassrooms(connection);
+                    case 4 -> viewClassroomSchedule(connection, scanner);
+                    case 5 -> {
+                        createCourseSchedule(preparedStatement, connection, scanner);
+                        viewCourseSchedules(connection);
                     }
-                    case 5 -> assignClassroom(connection, scanner);
-                    case 6 -> unassignClassroom(connection, scanner);
-                    case 7 -> viewClassroomSchedule(resultSet, preparedStatement, connection, scanner);
+                    case 6 -> viewCourseSchedules(connection);
+                    case 7 -> {
+                        editCourseSchedule(resultSet, connection, scanner);
+                        viewCourseSchedules(connection);
+                    }
+                    case 8 -> {
+                        deleteCourseSchedule(connection, scanner);
+                        viewCourseSchedules(connection);
+                    }
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid selection. Please try again.");
@@ -188,24 +196,141 @@ public class InfrastructureMenu {
         }
     }
 
-    private void createClassroom(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
-        ResultSet resultSet = null;
-        System.out.println("Enter classroom capacity: ");
-        int capacity = scanner.nextInt();
+    private void printClassroomMenu() {
+        System.out.println("Classroom Management Menu");
+        System.out.println("1. Create classroom");
+        System.out.println("2. View classrooms");
+        System.out.println("3. Delete classroom");
+        System.out.println("4. View classroom schedule");
+        System.out.println("5. Create course schedule");
+        System.out.println("6. View course schedule");
+        System.out.println("7. Edit course schedule");
+        System.out.println("8. Delete course schedule");
+        System.out.println("0. Return to main menu");
+    }
+
+    private void deleteCourseSchedule(Connection connection, Scanner scanner) {
+        viewCourseSchedules(connection);
+        System.out.println("Enter course schedule id: ");
+        int courseScheduleId = scanner.nextInt();
         try {
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_COURSE_SCHEDULE_BY_ID);
+            preparedStatement.setInt(1, courseScheduleId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void editCourseSchedule(ResultSet resultSet, Connection connection, Scanner scanner) {
+        viewCourseSchedules(connection);
+        System.out.println("Enter course schedule id: ");
+        int courseScheduleId = scanner.nextInt();
+        System.out.println("Enter course id: ");
+        int courseId = scanner.nextInt();
+        System.out.println("Enter year for course schedule: ");
+        int year = scanner.nextInt();
+        System.out.println("Enter month for course schedule: ");
+        int month = scanner.nextInt();
+        System.out.println("Enter day for course schedule: ");
+        int day = scanner.nextInt();
+        LocalDate date = LocalDate.of(year, month, day);
+        System.out.println("Enter classroom id: ");
+        int classroomId = scanner.nextInt();
+        System.out.println("Enter 1 for Morning or 2 for Afternoon: ");
+        int timeType = scanner.nextInt();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COURSE_SCHEDULE_BY_ID);
+            preparedStatement.setInt(1, courseId);
+            preparedStatement.setDate(2, Date.valueOf(date));
+            preparedStatement.setInt(3, timeType);
+            preparedStatement.setInt(4, classroomId);
+            preparedStatement.setInt(5, courseScheduleId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void viewCourseSchedules(Connection connection) {
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(SELECT_ALL_COURSE_SCHEDULES);
+            resultSet = preparedStatement.executeQuery();
+            Utils.printSet(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createCourseSchedule(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
+        ResultSet resultSet = null;
+        CourseMenu.viewAllCourses(resultSet, preparedStatement, connection);
+        System.out.println("Enter course id: ");
+        int courseId = scanner.nextInt();
+        viewClassrooms(connection);
+        System.out.println("Enter classroom id: ");
+        int classroomId = scanner.nextInt();
+        System.out.println("Enter year for course schedule: ");
+        int year = scanner.nextInt();
+        System.out.println("Enter month for course schedule: ");
+        int month = scanner.nextInt();
+        System.out.println("Enter day for course schedule: ");
+        int day = scanner.nextInt();
+        LocalDate date = Utils.createLocalDate(year, month, day);
+        System.out.println("Enter 1 for Morning or 2 for Afternoon: ");
+        int timeType = scanner.nextInt();
+
+        try {
+            connection.setAutoCommit(false);
+            System.out.println(INSERT_COURSE_SCHEDULE);
+            preparedStatement = connection.prepareStatement(INSERT_COURSE_SCHEDULE);
+            preparedStatement.setInt(1, courseId);
+            preparedStatement.setDate(2, Date.valueOf(date));
+            preparedStatement.setInt(3, timeType);
+            preparedStatement.setInt(4, classroomId);
+            int result = preparedStatement.executeUpdate();
+            if(result == 1) {
+                System.out.println("Course schedule created successfully.");
+                connection.commit();
+            } else {
+                System.out.println("Course schedule creation failed.");
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error during course schedule insert.");
+            e.printStackTrace();
+            e.getErrorCode();
+        } finally {
+            try {
+                if(preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources.");
+            }
+        }
+    }
+
+    private void createClassroom(Connection connection, Scanner scanner) {
+        PreparedStatement preparedStatement = null;
+        try {
+            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(INSERT_CLASSROOM);
-            preparedStatement.setInt(1, capacity);
-            resultSet = preparedStatement.executeQuery(INSERT_CLASSROOM);
-            // Print the header
-            System.out.println("Classrooms");
-            Utils.printSet(resultSet);
+            int result = preparedStatement.executeUpdate(INSERT_CLASSROOM);
+            if(result == 1) {
+                System.out.println("Classroom created successfully.");
+                connection.commit();
+            } else {
+                System.out.println("Classroom creation failed.");
+                connection.rollback();
+            }
         } catch (SQLException e) {
             System.out.println("Error during classroom insert.");
+            e.printStackTrace();
         } finally {
             try {
-                if(resultSet != null) {
-                    resultSet.close();
-                }
                 if(preparedStatement != null) {
                     preparedStatement.close();
                 }
@@ -215,52 +340,26 @@ public class InfrastructureMenu {
         }
     }
 
-    private void editClassroom(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
-        ResultSet resultSet = null;
-        System.out.println("Enter classroom id: ");
-        int classroomId = scanner.nextInt();
-        System.out.println("Enter classroom capacity: ");
-        int capacity = scanner.nextInt();
-        try {
-            preparedStatement = connection.prepareStatement(UPDATE_CLASSROOM_BY_ID);
-            preparedStatement.setInt(1, capacity);
-            resultSet = preparedStatement.executeQuery(UPDATE_CLASSROOM_BY_ID);
-            // Print the header
-            System.out.println("Classrooms");
-            Utils.printSet(resultSet);
-        } catch (SQLException e) {
-            System.out.println("Error during classroom insert.");
-        } finally {
-            try {
-                if(resultSet != null) {
-                    resultSet.close();
-                }
-                if(preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources.");
-            }
-        }
-    }
 
-    private void deleteClassroom(ResultSet resultSet, PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
+    private void deleteClassroom(PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
         System.out.println("Enter classroom id: ");
         int classroomId = scanner.nextInt();
         try {
+            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(DELETE_CLASSROOM_BY_ID);
             preparedStatement.setInt(1, classroomId);
-            resultSet = preparedStatement.executeQuery(DELETE_CLASSROOM_BY_ID);
-            // Print the header
-            System.out.println("Classrooms");
-            Utils.printSet(resultSet);
+            int result = preparedStatement.executeUpdate(DELETE_CLASSROOM_BY_ID);
+            if(result == 1) {
+                System.out.println("Classroom deleted successfully.");
+                connection.commit();
+            } else {
+                System.out.println("Classroom deletion failed.");
+                connection.rollback();
+            }
         } catch (SQLException e) {
             System.out.println("Error during classroom delete.");
         } finally {
             try {
-                if(resultSet != null) {
-                    resultSet.close();
-                }
                 if(preparedStatement != null) {
                     preparedStatement.close();
                 }
@@ -291,41 +390,113 @@ public class InfrastructureMenu {
 
     }
 
-    private void assignClassroom(Connection connection, Scanner scanner) {
-        throw new RuntimeException("Not implemented yet.");
+    private void viewClassroomSchedule(Connection connection, Scanner scanner) {
+        int viewClassroomScheduleSelection;
 
+        while(true) {
+            printViewClassroomScheduleSubMenu();
+            try {
+                viewClassroomScheduleSelection = scanner.nextInt();
+                switch (viewClassroomScheduleSelection) {
+                    case 0 -> {
+                        return;
+                    }
+                    case 1 -> {
+                        viewWeeklyScheduleOfClassroom(connection, scanner);
+                        viewClassrooms(connection);
+                    }
+                    case 2 -> viewClassroomAvailability(connection, scanner);
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid selection. Please try again.");
+                scanner.nextLine();
+            }
+        }
     }
 
-    private void unassignClassroom(Connection connection, Scanner scanner) {
-        throw new RuntimeException("Not implemented yet.");
-
+    private void printViewClassroomScheduleSubMenu() {
+        System.out.println("View Classroom Schedule");
+        System.out.println("1. View weekly schedule of classroom");
+        System.out.println("2. View classroom availability");
+        System.out.println("0. Return to previous menu");
     }
 
-    private void viewClassroomSchedule(ResultSet resultSet, PreparedStatement preparedStatement, Connection connection, Scanner scanner) {
-        throw new RuntimeException("Not implemented yet.");
-//        System.out.println("Enter classroom id: ");
-//        int classroomId = scanner.nextInt();
-//        try {
-//            preparedStatement = connection.prepareStatement(SELECT_CLASSROOM_SCHEDULE);
-//            preparedStatement.setInt(1, classroomId);
-//            resultSet = preparedStatement.executeQuery(SELECT_CLASSROOM_SCHEDULE);
-//            // Print the header
-//            System.out.println("Classrooms");
-//            Utils.printSet(resultSet);
-//        } catch (SQLException e) {
-//            System.out.println("Error during classroom select.");
-//        } finally {
-//            try {
-//                if(resultSet != null) {
-//                    resultSet.close();
-//                }
-//                if(preparedStatement != null) {
-//                    preparedStatement.close();
-//                }
-//            } catch (SQLException e) {
-//                System.out.println("Error closing resources.");
-//            }
-//        }
+    private void viewClassroomAvailability(Connection connection, Scanner scanner) {
+        System.out.println("Enter year for which would like to view classroom availability: ");
+        int year = scanner.nextInt();
+        System.out.println("Enter month for which would like to view classroom availability: ");
+        int month = scanner.nextInt();
+        System.out.println("Enter day for which would like to view classroom availability: ");
+        int day = scanner.nextInt();
+        LocalDate date;
+        System.out.println("Would you like to view availability for morning or afternoon?");
+        System.out.println("1. Morning");
+        System.out.println("2. Afternoon");
+        int timeOfDay = scanner.nextInt();
+        if(timeOfDay != 1 && timeOfDay != 2) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        try {
+            date = Utils.createLocalDate(year, month, day);
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_AVAILABLE_CLASSROOMS_BY_DATE_AND_TIME);
+            preparedStatement.setDate(1, Date.valueOf(date));
+            preparedStatement.setInt(2, timeOfDay);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            Utils.printSet(resultSet);
+        } catch (DateTimeException dateTimeException) {
+            System.out.println("Invalid date entered.");
+            return;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void viewWeeklyScheduleOfClassroom(Connection connection, Scanner scanner) {
+        viewClassrooms(connection);
+        System.out.println("Which classroom would you like to view the schedule for?");
+        System.out.println("Enter classroom ID: ");
+        int classroom_id = scanner.nextInt();
+        System.out.println("Enter year for which would like to view classroom schedule: ");
+        int year = scanner.nextInt();
+        System.out.println("Enter month for which would like to view classroom schedule: ");
+        int month = scanner.nextInt();
+        System.out.println("Enter day for which would like to view classroom schedule: ");
+        int day = scanner.nextInt();
+        LocalDate date;
+        try {
+            date = Utils.createLocalDate(year, month, day);
+        } catch (DateTimeException dateTimeException) {
+            System.out.println("Invalid date entered.");
+            return;
+        }
+        System.out.println("Available times for classroom " + classroom_id + " for week of " + date + ":");
+        for(int i = 0; i < 7; i++) {
+            LocalDate currentDate = date.plusDays(i);
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CLASSROOM_SCHEDULE);
+                preparedStatement.setInt(1, classroom_id);
+                preparedStatement.setDate(2, Date.valueOf(currentDate));
+                preparedStatement.setInt(3, 1);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if(resultSet.next()) {
+                    continue;
+                }
+                System.out.println(currentDate + " AM");
+                preparedStatement = connection.prepareStatement(SELECT_CLASSROOM_SCHEDULE);
+                preparedStatement.setInt(1, classroom_id);
+                preparedStatement.setDate(2, Date.valueOf(currentDate));
+                preparedStatement.setInt(3, 2);
+                resultSet = preparedStatement.executeQuery();
+                if(resultSet.next()) {
+                    continue;
+                }
+                System.out.println(currentDate + " PM");
+            } catch (SQLException e) {
+                System.out.println("Error during range schedule retrieval.");
+                e.printStackTrace();
+            }
+        }
     }
 
     private void createRange(PreparedStatement preparedStatement,
@@ -398,7 +569,7 @@ public class InfrastructureMenu {
     }
     private void editRange(PreparedStatement preparedStatement,
                            Connection connection,
-                            Scanner scanner
+                           Scanner scanner
     ) {
         viewRanges(connection);
         System.out.println("Enter range ID to edit: ");
@@ -408,7 +579,7 @@ public class InfrastructureMenu {
             System.out.println("Range does not exist.");
             return;
         }
-        // TODO Print range type options
+        viewRangeTypes(connection);
         System.out.println("Enter new range type ID: ");
         int rangeTypeId = scanner.nextInt();
         // verify bike range type exists
@@ -421,6 +592,7 @@ public class InfrastructureMenu {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(UPDATE_BIKE_RANGE_BY_ID);
             preparedStatement.setInt(1, rangeTypeId);
+            preparedStatement.setInt(2, rangeId);
             int createRangeResult = preparedStatement.executeUpdate();
             if(createRangeResult == 1) {
                 System.out.println("Range updated successfully.");
@@ -431,6 +603,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range edit.");
+            System.out.println(e.getMessage());
         }
 
     }
@@ -519,7 +692,7 @@ public class InfrastructureMenu {
             System.out.println("Invalid date entered.");
             return;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
     }
 
@@ -562,10 +735,9 @@ public class InfrastructureMenu {
                 if(resultSet.next()) {
                     continue;
                 }
-                    System.out.println(currentDate + " PM");
+                System.out.println(currentDate + " PM");
             } catch (SQLException e) {
                 System.out.println("Error during range schedule retrieval.");
-                e.printStackTrace();
             }
         }
     }
@@ -594,35 +766,34 @@ public class InfrastructureMenu {
             ResultSet courseScheduleResultSet = courseSchedulePreparedStatement.executeQuery();
             // Print the header
             System.out.println("Course Schedule");
-            System.out.printf("%-30s%-30s%-30s%-30s%n",
-                    "Course Schedule ID",
-                    "Course Date",
-                    "Course Name",
-                    "Course Type"
-            );
-            while(courseScheduleResultSet.next()) {
-                System.out.printf("%-30s%-30s%-30s%-30s%n",
-                        courseScheduleResultSet.getInt("course_schedule_id"),
-                        courseScheduleResultSet.getDate("course_date"),
-                        courseScheduleResultSet.getString("course_name"),
-                        courseScheduleResultSet.getString("course_type_value")
-                );
-            }
+            Utils.printSet(courseScheduleResultSet);
         } catch(SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
 
         System.out.println("Enter course schedule ID for which you would like to assign a range: ");
         int courseScheduleId = scanner.nextInt();
         List<Integer> listOfAvailableRanges = new ArrayList<>();
+        // get the date of the selected course
+        LocalDate courseDate = null;
         try {
+            PreparedStatement courseDatePreparedStatement = connection.prepareStatement(SELECT_COURSE_SCHEDULE_DATE_BY_ID);
+            courseDatePreparedStatement.setInt(1, courseScheduleId);
+            ResultSet courseDateResultSet = courseDatePreparedStatement.executeQuery();
+            if(courseDateResultSet.next()) {
+                courseDate = courseDateResultSet.getDate("course_date").toLocalDate();
+            }
+            if(courseDate == null) {
+                System.out.println("Could not find course date for ID " + courseScheduleId + ".");
+                return;
+            }
             // Find the ranges available for the given date
             PreparedStatement availableRangesPreparedStatement = connection.prepareStatement(SELECT_AVAILABLE_RANGE_BY_COURSE_SCHEDULE_ID);
             availableRangesPreparedStatement.setInt(1, courseScheduleId);
-            availableRangesPreparedStatement.setInt(2, courseScheduleId);
+            availableRangesPreparedStatement.setDate(2, Date.valueOf(courseDate));
+            availableRangesPreparedStatement.setInt(3, courseScheduleId);
+            availableRangesPreparedStatement.setDate(4, Date.valueOf(courseDate));
             ResultSet availableRangesResultSet = availableRangesPreparedStatement.executeQuery();
-            // Print the header
-            System.out.println("Available Ranges");
             System.out.printf("%-10s%-30s%-30s%n",
                     "Range ID",
                     "Range Type",
@@ -637,7 +808,7 @@ public class InfrastructureMenu {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
         System.out.println("Enter range ID to assign: ");
         int rangeId = scanner.nextInt();
@@ -661,9 +832,8 @@ public class InfrastructureMenu {
                 connection.rollback();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
-
     }
     private void unassignRange(Connection connection,
                                Scanner scanner
@@ -702,7 +872,7 @@ public class InfrastructureMenu {
     ) {
         String rangeType;
         System.out.println("Enter range type: ");
-        rangeType = scanner.nextLine();
+        rangeType = scanner.next();
         try {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO range_type (range_type_value) VALUES (?)");
@@ -718,6 +888,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type creation.");
+            e.getMessage();
         }
     }
 
@@ -728,15 +899,11 @@ public class InfrastructureMenu {
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT * FROM range_type");
             // Print the header
-            System.out.printf("%-5s%-30s%n", "ID", "Range Type");
-            while(resultSet.next()) {
-                System.out.printf("%-5s%-30s%n",
-                        resultSet.getInt("range_type_id"),
-                        resultSet.getString("range_type_value")
-                );
-            }
+            System.out.println("Range Types");
+            Utils.printSet(resultSet);
         } catch (SQLException e) {
             System.out.println("Error during range type retrieval.");
+            e.getMessage();
         } finally {
             try {
                 if(resultSet != null) {
@@ -757,6 +924,7 @@ public class InfrastructureMenu {
             preparedStatement = connection.prepareStatement(SELECT_FROM_BIKE_RANGE_BY_ID);
         } catch (SQLException e) {
             System.out.println("Error during range retrieval.");
+            e.getMessage();
         }
         try {
             preparedStatement.setInt(1, rangeId);
@@ -766,6 +934,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range retrieval.");
+            e.getMessage();
         } finally {
             try {
                 if(resultSet != null) {
@@ -781,9 +950,9 @@ public class InfrastructureMenu {
         return rangeExists;
     }
     private boolean rangeTypeExists(
-                               PreparedStatement preparedStatement,
-                               Connection connection,
-                               int rangeTypeID
+            PreparedStatement preparedStatement,
+            Connection connection,
+            int rangeTypeID
     ) {
         ResultSet resultSet = null;
         boolean rangeTypeExists = false;
@@ -796,6 +965,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type retrieval.");
+            e.getMessage();
         } finally {
             try {
                 if(resultSet != null) {
@@ -824,7 +994,7 @@ public class InfrastructureMenu {
         }
         String rangeType;
         System.out.println("Enter new range type: ");
-        rangeType = scanner.nextLine();
+        rangeType = scanner.next();
         try {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement("UPDATE range_type SET range_type_value = ? WHERE range_type_id = ?");
@@ -867,6 +1037,7 @@ public class InfrastructureMenu {
             }
         } catch (SQLException e) {
             System.out.println("Error during range type deletion.");
+            e.getMessage();
         }
     }
     private void printRangeMenu() {
